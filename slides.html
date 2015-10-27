@@ -707,4 +707,582 @@ pool.scoped(<span class="highlighted">|scope| { ... }</span>);
         }
     }
 }
-</code></pre></div></section><section class="slide"><div><h2>It works!</h2></div></section><section class="slide"><div><h2>What does this show?</h2><ul><li>Worker pools can manage large tasks with a bounded number of threads.</li><li class="next">Channels are a convenient way to carry messages between threads.</li><li class="next">We can throw pointers around between threads without fear.</li><li class="next">Concurrent Rust programs are still non-deterministic, but the non-determinism occurs only at operations designed for it—not just anywhere.</li></ul></div></section><div class="progress"><div/></div><script src="shower/shower.min.js"></script></body></html>
+</code></pre></div></section><section class="slide"><div><h2>It works!</h2></div></section><section class="slide"><div><h2>What does this show?</h2><ul><li>Worker pools can manage large tasks with a bounded number of threads.</li><li class="next">Channels are a convenient way to carry messages between threads.</li><li class="next">We can throw pointers around between threads without fear.</li><li class="next">Concurrent Rust programs are still non-deterministic, but the non-determinism occurs only at operations designed for it—not just anywhere.</li></ul></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-0.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-1.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-2.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-3.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-4.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-5.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-6.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-7.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-8.svg"/></div></section><section class="slide"><div><h2>a variation</h2><pre><code>fn (c: f64) {
+    z = 0;
+    loop {
+        z = z*z + c;
+    }
+}
+</code></pre><p class="next">Unless -2 ≤ c ≤ 0.25, z escapes.
+</p></div></section><section class="slide"><div><h2>a Complex variation</h2><pre><code>fn (c: Complex&lt;f64&gt;) {
+    z = Complex { re: 0., im: 0. };
+    loop {
+        z = z*z + c;
+    }
+}
+</code></pre><p class="next">... it's complicated.
+</p></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/mandelbrot.png"/></div></section><section class="slide"><div><h2>the Mandelbrot escape calculation</h2><pre><code>fn escapes(c: Complex&lt;f64&gt;, limit: u32) -&gt; Option&lt;u32&gt; {
+    let mut z = Complex { re: 0.0, im: 0.0 };
+    for i in 0..limit {
+        z = z*z + c;
+        if z.norm_sqr() &gt; 4.0 {
+            return Some(i);
+        }
+    }
+
+    return None;
+}
+</code></pre></div></section><section class="slide"><div><h2>the Mandelbrot escape calculation</h2><pre><code>fn escapes(c: Complex&lt;f64&gt;, limit: u32) -&gt; <span class="highlighted">Option&lt;u32&gt;</span> {
+    let mut z = Complex { re: 0.0, im: 0.0 };
+    for i in 0..limit {
+        z = z*z + c;
+        if z.norm_sqr() &gt; 4.0 {
+            return Some(i);
+        }
+    }
+
+    return None;
+}
+</code></pre></div></section><section class="slide"><div><h2>the Mandelbrot escape calculation</h2><pre><code>fn escapes(c: Complex&lt;f64&gt;, <span class="highlighted">limit: u32</span>) -&gt; Option&lt;u32&gt; {
+    let mut z = Complex { re: 0.0, im: 0.0 };
+    <span class="highlighted">for i in 0..limit</span> {
+        z = z*z + c;
+        if z.norm_sqr() &gt; 4.0 {
+            return Some(i);
+        }
+    }
+
+    return None;
+}
+</code></pre></div></section><section class="slide"><div><h2>the Mandelbrot escape calculation</h2><pre><code>fn escapes(c: Complex&lt;f64&gt;, limit: u32) -&gt; Option&lt;u32&gt; {
+    let mut z = Complex { re: 0.0, im: 0.0 };
+    for i in 0..limit {
+        z = z*z + c;
+        <span class="highlighted">if z.norm_sqr() &gt; 4.0</span> {
+            return Some(i);
+        }
+    }
+
+    return None;
+}
+</code></pre></div></section><section class="slide"><div><h2>the Mandelbrot escape calculation</h2><pre><code>fn escapes(c: Complex&lt;f64&gt;, limit: u32) -&gt; Option&lt;u32&gt; {
+    let mut z = Complex { re: 0.0, im: 0.0 };
+    for i in 0..limit {
+        z = z*z + c;
+        if z.norm_sqr() &gt; 4.0 {
+            return Some(i);
+        }
+    }
+
+    <span class="highlighted">return None;</span>
+}
+</code></pre></div></section><section class="slide"><div><h2>mapping pixels to points</h2><pre><code>fn pixel_to_point(bounds: (usize, usize),
+                  pixel:  (usize, usize),
+                  ul: (f64, f64),
+                  lr: (f64, f64))
+    -&gt; (f64, f64)
+{
+    let (width, height) = (lr.0 - ul.0,
+                           ul.1 - lr.1);
+    (ul.0 + pixel.0 as f64 * width  / bounds.0 as f64,
+     ul.1 - pixel.1 as f64 * height / bounds.1 as f64)
+}
+</code></pre></div></section><section class="slide"><div><h2>mapping pixels to points</h2><pre><code>fn pixel_to_point(<span class="highlighted">bounds: (usize, usize)</span>,
+                  pixel:  (usize, usize),
+                  ul: (f64, f64),
+                  lr: (f64, f64))
+    -&gt; (f64, f64)
+{
+    let (width, height) = (lr.0 - ul.0,
+                           ul.1 - lr.1);
+    (ul.0 + pixel.0 as f64 * width  / bounds.0 as f64,
+     ul.1 - pixel.1 as f64 * height / bounds.1 as f64)
+}
+</code></pre></div></section><section class="slide"><div><h2>mapping pixels to points</h2><pre><code>fn pixel_to_point(bounds: (usize, usize),
+                  <span class="highlighted">pixel:  (usize, usize)</span>,
+                  ul: (f64, f64),
+                  lr: (f64, f64))
+    -&gt; (f64, f64)
+{
+    let (width, height) = (lr.0 - ul.0,
+                           ul.1 - lr.1);
+    (ul.0 + pixel.0 as f64 * width  / bounds.0 as f64,
+     ul.1 - pixel.1 as f64 * height / bounds.1 as f64)
+}
+</code></pre></div></section><section class="slide"><div><h2>mapping pixels to points</h2><pre><code>fn pixel_to_point(bounds: (usize, usize),
+                  pixel:  (usize, usize),
+                  <span class="highlighted">ul: (f64, f64)</span>,
+                  lr: (f64, f64))
+    -&gt; (f64, f64)
+{
+    let (width, height) = (lr.0 - ul.0,
+                           ul.1 - lr.1);
+    (ul.0 + pixel.0 as f64 * width  / bounds.0 as f64,
+     ul.1 - pixel.1 as f64 * height / bounds.1 as f64)
+}
+</code></pre></div></section><section class="slide"><div><h2>mapping pixels to points</h2><pre><code>fn pixel_to_point(bounds: (usize, usize),
+                  pixel:  (usize, usize),
+                  ul: (f64, f64),
+                  <span class="highlighted">lr: (f64, f64)</span>)
+    -&gt; (f64, f64)
+{
+    let (width, height) = (lr.0 - ul.0,
+                           ul.1 - lr.1);
+    (ul.0 + pixel.0 as f64 * width  / bounds.0 as f64,
+     ul.1 - pixel.1 as f64 * height / bounds.1 as f64)
+}
+</code></pre></div></section><section class="slide"><div><h2>mapping pixels to points</h2><pre><code>fn pixel_to_point(bounds: (usize, usize),
+                  pixel:  (usize, usize),
+                  ul: (f64, f64),
+                  lr: (f64, f64))
+    -&gt; <span class="highlighted">(f64, f64)</span>
+{
+    let (width, height) = (lr.0 - ul.0,
+                           ul.1 - lr.1);
+    (ul.0 + pixel.0 as f64 * width  / bounds.0 as f64,
+     ul.1 - pixel.1 as f64 * height / bounds.1 as f64)
+}
+</code></pre></div></section><section class="slide"><div><h2>mapping pixels to points</h2><pre><code>fn pixel_to_point(bounds: (usize, usize),
+                  pixel:  (usize, usize),
+                  ul: (f64, f64),
+                  lr: (f64, f64))
+    -&gt; (f64, f64)
+{
+    let (width, height) = (<span class="highlighted">lr.0</span> - <span class="highlighted">ul.0</span>,
+                           <span class="highlighted">ul.1</span> - <span class="highlighted">lr.1</span>);
+    (<span class="highlighted">ul.0</span> + <span class="highlighted">pixel.0</span> as f64 * width  / <span class="highlighted">bounds.0</span> as f64,
+     <span class="highlighted">ul.1</span> - <span class="highlighted">pixel.1</span> as f64 * height / <span class="highlighted">bounds.1</span> as f64)
+}
+</code></pre></div></section><section class="slide"><div><h2>mapping pixels to points</h2><pre><code>fn pixel_to_point(bounds: (usize, usize),
+                  pixel:  (usize, usize),
+                  ul: (f64, f64),
+                  lr: (f64, f64))
+    -&gt; (f64, f64)
+{
+    let (width, height) = (lr.0 - ul.0,
+                           ul.1 - lr.1);
+    (ul.0 + pixel.0 <span class="highlighted">as f64</span> * width  / bounds.0 <span class="highlighted">as f64</span>,
+     ul.1 - pixel.1 <span class="highlighted">as f64</span> * height / bounds.1 <span class="highlighted">as f64</span>)
+}
+</code></pre></div></section><section class="slide"><div><h2>rendering the set</h2><pre><code>fn render(pixels: &amp;mut [u8], bounds: (usize, usize),
+          ul: (f64, f64), lr: (f64, f64)) {
+   for r in 0 .. bounds.1 {
+      for c in 0 .. bounds.0 {
+         let pt = pixel_to_point(bounds, (c, r), ul, lr);
+         let pt = Complex { re: pt.0, im: pt.1 };
+         pixels[r * bounds.0 + c] =
+            match escapes(pt, 255) {
+               None =&gt; 0,
+               Some(count) =&gt; 255 - count as u8
+            };
+      }
+   }
+}
+</code></pre></div></section><section class="slide"><div><h2>rendering the set</h2><pre><code>fn render(pixels: <span class="highlighted">&amp;mut [u8]</span>, bounds: (usize, usize),
+          ul: (f64, f64), lr: (f64, f64)) {
+   for r in 0 .. bounds.1 {
+      for c in 0 .. bounds.0 {
+         let pt = pixel_to_point(bounds, (c, r), ul, lr);
+         let pt = Complex { re: pt.0, im: pt.1 };
+         pixels[r * bounds.0 + c] =
+            match escapes(pt, 255) {
+               None =&gt; 0,
+               Some(count) =&gt; 255 - count as u8
+            };
+      }
+   }
+}
+</code></pre></div></section><section class="slide"><div><h2>rendering the set</h2><pre><code>fn render(pixels: &amp;mut [u8], bounds: (usize, usize),
+          ul: (f64, f64), lr: (f64, f64)) {
+   <span class="highlighted">for r in 0 .. bounds.1</span> {
+      for c in 0 .. bounds.0 {
+         let pt = pixel_to_point(bounds, (c, r), ul, lr);
+         let pt = Complex { re: pt.0, im: pt.1 };
+         pixels[r * bounds.0 + c] =
+            match escapes(pt, 255) {
+               None =&gt; 0,
+               Some(count) =&gt; 255 - count as u8
+            };
+      }
+   }
+}
+</code></pre></div></section><section class="slide"><div><h2>rendering the set</h2><pre><code>fn render(pixels: &amp;mut [u8], bounds: (usize, usize),
+          ul: (f64, f64), lr: (f64, f64)) {
+   for r in 0 .. bounds.1 {
+      <span class="highlighted">for c in 0 .. bounds.0</span> {
+         let pt = pixel_to_point(bounds, (c, r), ul, lr);
+         let pt = Complex { re: pt.0, im: pt.1 };
+         pixels[r * bounds.0 + c] =
+            match escapes(pt, 255) {
+               None =&gt; 0,
+               Some(count) =&gt; 255 - count as u8
+            };
+      }
+   }
+}
+</code></pre></div></section><section class="slide"><div><h2>rendering the set</h2><pre><code>fn render(pixels: &amp;mut [u8], bounds: (usize, usize),
+          ul: (f64, f64), lr: (f64, f64)) {
+   for r in 0 .. bounds.1 {
+      for c in 0 .. bounds.0 {
+         let pt = <span class="highlighted">pixel_to_point(bounds, (c, r), ul, lr)</span>;
+         let pt = Complex { re: pt.0, im: pt.1 };
+         pixels[r * bounds.0 + c] =
+            match escapes(pt, 255) {
+               None =&gt; 0,
+               Some(count) =&gt; 255 - count as u8
+            };
+      }
+   }
+}
+</code></pre></div></section><section class="slide"><div><h2>rendering the set</h2><pre><code>fn render(pixels: &amp;mut [u8], bounds: (usize, usize),
+          ul: (f64, f64), lr: (f64, f64)) {
+   for r in 0 .. bounds.1 {
+      for c in 0 .. bounds.0 {
+         let pt = pixel_to_point(bounds, (c, r), ul, lr);
+         let pt = <span class="highlighted">Complex { re: pt.0, im: pt.1 }</span>;
+         pixels[r * bounds.0 + c] =
+            match escapes(pt, 255) {
+               None =&gt; 0,
+               Some(count) =&gt; 255 - count as u8
+            };
+      }
+   }
+}
+</code></pre></div></section><section class="slide"><div><h2>rendering the set</h2><pre><code>fn render(pixels: &amp;mut [u8], bounds: (usize, usize),
+          ul: (f64, f64), lr: (f64, f64)) {
+   for r in 0 .. bounds.1 {
+      for c in 0 .. bounds.0 {
+         let pt = pixel_to_point(bounds, (c, r), ul, lr);
+         let pt = Complex { re: pt.0, im: pt.1 };
+         pixels[r * bounds.0 + c] =
+            match <span class="highlighted">escapes(pt, 255)</span> {
+               None =&gt; 0,
+               Some(count) =&gt; 255 - count as u8
+            };
+      }
+   }
+}
+</code></pre></div></section><section class="slide"><div><h2>rendering the set</h2><pre><code>fn render(pixels: &amp;mut [u8], bounds: (usize, usize),
+          ul: (f64, f64), lr: (f64, f64)) {
+   for r in 0 .. bounds.1 {
+      for c in 0 .. bounds.0 {
+         let pt = pixel_to_point(bounds, (c, r), ul, lr);
+         let pt = Complex { re: pt.0, im: pt.1 };
+         pixels[r * bounds.0 + c] =
+            match escapes(pt, 255) {
+               <span class="highlighted">None =&gt; 0</span>,
+               Some(count) =&gt; 255 - count as u8
+            };
+      }
+   }
+}
+</code></pre></div></section><section class="slide"><div><h2>rendering the set</h2><pre><code>fn render(pixels: &amp;mut [u8], bounds: (usize, usize),
+          ul: (f64, f64), lr: (f64, f64)) {
+   for r in 0 .. bounds.1 {
+      for c in 0 .. bounds.0 {
+         let pt = pixel_to_point(bounds, (c, r), ul, lr);
+         let pt = Complex { re: pt.0, im: pt.1 };
+         pixels[r * bounds.0 + c] =
+            match escapes(pt, 255) {
+               None =&gt; 0,
+               <span class="highlighted">Some(count) =&gt; 255 - count as u8</span>
+            };
+      }
+   }
+}
+</code></pre></div></section><section class="slide"><div><h2>rendering the set</h2><pre><code>fn render(pixels: &amp;mut [u8], bounds: (usize, usize),
+          ul: (f64, f64), lr: (f64, f64)) {
+   for r in 0 .. bounds.1 {
+      for c in 0 .. bounds.0 {
+         let pt = pixel_to_point(bounds, (c, r), ul, lr);
+         let pt = Complex { re: pt.0, im: pt.1 };
+         <span class="highlighted">pixels[r * bounds.0 + c]</span> =
+            match escapes(pt, 255) {
+               None =&gt; 0,
+               Some(count) =&gt; 255 - count as u8
+            };
+      }
+   }
+}
+</code></pre></div></section><section class="slide"><div><h2>writing the image file</h2><pre><code>fn write_bitmap(filename: &amp;str,
+                pixels: &amp;[u8],
+                bounds: (usize, usize))
+    -&gt; Result&lt;()&gt;
+{
+    let output = try!(File::create(filename));
+    let encoder = PNGEncoder::new(output);
+    try!(encoder.encode(pixels,
+                        bounds.0 as u32, bounds.1 as u32,
+                        ColorType::Gray(8)));
+    Ok(())
+}
+</code></pre></div></section><section class="slide"><div><h2>writing the image file</h2><pre><code>fn write_bitmap(filename: &amp;str,
+                pixels: &amp;[u8],
+                bounds: (usize, usize))
+    -&gt; Result&lt;()&gt;
+{
+    let output = try!(<span class="highlighted">File::create(filename)</span>);
+    let encoder = PNGEncoder::new(output);
+    try!(encoder.encode(pixels,
+                        bounds.0 as u32, bounds.1 as u32,
+                        ColorType::Gray(8)));
+    Ok(())
+}
+</code></pre></div></section><section class="slide"><div><h2>writing the image file</h2><pre><code>fn write_bitmap(filename: &amp;str,
+                pixels: &amp;[u8],
+                bounds: (usize, usize))
+    -&gt; Result&lt;()&gt;
+{
+    let output = try!(File::create(filename));
+    let encoder = <span class="highlighted">PNGEncoder::new(output)</span>;
+    try!(encoder.encode(pixels,
+                        bounds.0 as u32, bounds.1 as u32,
+                        ColorType::Gray(8)));
+    Ok(())
+}
+</code></pre></div></section><section class="slide"><div><h2>writing the image file</h2><pre><code>fn write_bitmap(filename: &amp;str,
+                pixels: &amp;[u8],
+                bounds: (usize, usize))
+    -&gt; Result&lt;()&gt;
+{
+    let output = try!(File::create(filename));
+    let encoder = PNGEncoder::new(output);
+    try!(<span class="highlighted">encoder.encode</span>(pixels,
+                        bounds.0 as u32, bounds.1 as u32,
+                        ColorType::Gray(8)));
+    Ok(())
+}
+</code></pre></div></section><section class="slide"><div><h2>writing the image file</h2><pre><code>fn write_bitmap(filename: &amp;str,
+                pixels: &amp;[u8],
+                bounds: (usize, usize))
+    -&gt; Result&lt;()&gt;
+{
+    let output = try!(File::create(filename));
+    let encoder = PNGEncoder::new(output);
+    try!(encoder.encode(pixels,
+                        bounds.0 as u32, bounds.1 as u32,
+                        <span class="highlighted">ColorType::Gray(8)</span>));
+    Ok(())
+}
+</code></pre></div></section><section class="slide"><div><h2>banding the Mandelbrot</h2><img alt="" src="images/sliced-mandelbrot.svg"/></div></section><section class="slide"><div><h2>banded driver</h2><pre><code>let bands : Vec&lt;_&gt;
+    = pixels.chunks_mut(band_rows * bounds.0).collect();
+crossbeam::scope(|scope| {
+    for (i, band) in bands.into_iter().enumerate() {
+        let top = band_rows * i;
+        let height = band.len() / bounds.0;
+        let band_bounds = (bounds.0, height);
+        let (band_ul, band_lr) = ...;
+        scope.spawn(move || {
+            render(band, band_bounds, band_ul, band_lr);
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>banded driver</h2><pre><code>let bands : Vec&lt;_&gt;
+    = <span class="highlighted">pixels.chunks_mut</span>(band_rows * bounds.0).collect();
+crossbeam::scope(|scope| {
+    for (i, band) in bands.into_iter().enumerate() {
+        let top = band_rows * i;
+        let height = band.len() / bounds.0;
+        let band_bounds = (bounds.0, height);
+        let (band_ul, band_lr) = ...;
+        scope.spawn(move || {
+            render(band, band_bounds, band_ul, band_lr);
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>banded driver</h2><pre><code>let bands : Vec&lt;_&gt;
+    = pixels.chunks_mut(<span class="highlighted">band_rows * bounds.0</span>).collect();
+crossbeam::scope(|scope| {
+    for (i, band) in bands.into_iter().enumerate() {
+        let top = band_rows * i;
+        let height = band.len() / bounds.0;
+        let band_bounds = (bounds.0, height);
+        let (band_ul, band_lr) = ...;
+        scope.spawn(move || {
+            render(band, band_bounds, band_ul, band_lr);
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>banded driver</h2><pre><code>let bands <span class="highlighted">: Vec&lt;_&gt;</span>
+    = pixels.chunks_mut(band_rows * bounds.0).collect();
+crossbeam::scope(|scope| {
+    for (i, band) in bands.into_iter().enumerate() {
+        let top = band_rows * i;
+        let height = band.len() / bounds.0;
+        let band_bounds = (bounds.0, height);
+        let (band_ul, band_lr) = ...;
+        scope.spawn(move || {
+            render(band, band_bounds, band_ul, band_lr);
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>banded driver</h2><pre><code>let bands : Vec&lt;_&gt;
+    = pixels.chunks_mut(band_rows * bounds.0).collect();
+<span class="highlighted">crossbeam::scope</span>(|scope| {
+    for (i, band) in bands.into_iter().enumerate() {
+        let top = band_rows * i;
+        let height = band.len() / bounds.0;
+        let band_bounds = (bounds.0, height);
+        let (band_ul, band_lr) = ...;
+        scope.spawn(move || {
+            render(band, band_bounds, band_ul, band_lr);
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>banded driver</h2><pre><code>let bands : Vec&lt;_&gt;
+    = pixels.chunks_mut(band_rows * bounds.0).collect();
+crossbeam::scope(|scope| {
+    for (i, band) in <span class="highlighted">bands.into_iter()</span>.enumerate() {
+        let top = band_rows * i;
+        let height = band.len() / bounds.0;
+        let band_bounds = (bounds.0, height);
+        let (band_ul, band_lr) = ...;
+        scope.spawn(move || {
+            render(band, band_bounds, band_ul, band_lr);
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>banded driver</h2><pre><code>let bands : Vec&lt;_&gt;
+    = pixels.chunks_mut(band_rows * bounds.0).collect();
+crossbeam::scope(|scope| {
+    for <span class="highlighted">(i, band)</span> in bands.into_iter().<span class="highlighted">enumerate()</span> {
+        let top = band_rows * i;
+        let height = band.len() / bounds.0;
+        let band_bounds = (bounds.0, height);
+        let (band_ul, band_lr) = ...;
+        scope.spawn(move || {
+            render(band, band_bounds, band_ul, band_lr);
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>banded driver</h2><pre><code>let bands : Vec&lt;_&gt;
+    = pixels.chunks_mut(band_rows * bounds.0).collect();
+crossbeam::scope(|scope| {
+    for (i, band) in bands.into_iter().enumerate() {
+        let top = band_rows * i;
+        let height = band.len() / bounds.0;
+        let band_bounds = (bounds.0, height);
+        let (band_ul, band_lr) = ...;
+        <span class="highlighted">scope.spawn</span>(move || {
+            render(band, band_bounds, band_ul, band_lr);
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>banded driver</h2><pre><code>let bands : Vec&lt;_&gt;
+    = pixels.chunks_mut(band_rows * bounds.0).collect();
+crossbeam::scope(|scope| {
+    for (i, band) in bands.into_iter().enumerate() {
+        let top = band_rows * i;
+        let height = band.len() / bounds.0;
+        let band_bounds = (bounds.0, height);
+        let (band_ul, band_lr) = ...;
+        scope.spawn(move || {
+            <span class="highlighted">render(band, band_bounds, band_ul, band_lr)</span>;
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>banded Mandelbrot speedup</h2><img class="gnuplot" src="images/mandelbrot-8-no-ideal.png"/></div></section><section class="slide"><div><h2>banded Mandelbrot speedup</h2><img class="gnuplot" src="images/mandelbrot-8.png"/></div></section><section class="slide"><div><h2>banded Mandelbrot speedup</h2><img class="gnuplot" src="images/mandelbrot-16.png"/></div></section><section class="slide"><div><h2>banded Mandelbrot speedup</h2><img class="gnuplot" src="images/mandelbrot-100.png"/></div></section><section class="slide"><div><h2>Not all bands are the same</h2><img alt="" src="images/sliced-mandelbrot.svg"/></div></section><section class="slide"><div><h2>banded Mandelbrot speedup</h2><img class="gnuplot" src="images/mandelbrot-100.png"/></div></section><section class="slide"><div><h2>banded Mandelbrot speedup</h2><img class="gnuplot" src="images/mandelbrot-1000.png"/></div></section><section class="slide"><div><h2>dynamic band allocation</h2><img alt="" src="images/dynamic-sliced-mandelbrot.svg"/></div></section><section class="slide"><div><h2>Dynamically allocated bands</h2><pre><code>let bands =
+    Mutex::new(pixels.chunks_mut(band_rows * bounds.0)
+               .enumerate());
+crossbeam::scope(|scope| {
+    for i in 0..num_threads {
+        scope.spawn(|| { ... });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Dynamically allocated bands</h2><pre><code>let bands =
+    Mutex::new(<span class="highlighted">pixels.chunks_mut</span>(band_rows * bounds.0)
+               .enumerate());
+crossbeam::scope(|scope| {
+    for i in 0..num_threads {
+        scope.spawn(|| { ... });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Dynamically allocated bands</h2><pre><code>let bands =
+    <span class="highlighted">Mutex::new</span>(pixels.chunks_mut(band_rows * bounds.0)
+               .enumerate());
+crossbeam::scope(|scope| {
+    for i in 0..num_threads {
+        scope.spawn(|| { ... });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Dynamically allocated bands</h2><pre><code>let bands =
+    Mutex::new(pixels.chunks_mut(band_rows * bounds.0)
+               .enumerate());
+crossbeam::scope(|scope| {
+    <span class="highlighted">for i in 0..num_threads</span> {
+        scope.spawn(|| { ... });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Dynamically allocated bands</h2><pre><code>scope.spawn(|| {
+    loop {
+        match {
+            let mut guard = bands.lock().unwrap();
+            guard.next()
+        }
+        {
+            None =&gt; { return; }
+            Some((i, band)) =&gt; { render(band, ...); }
+        }
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Dynamically allocated bands</h2><pre><code>scope.spawn(|| {
+    loop {
+        match {
+            let mut guard = <span class="highlighted">bands.lock().unwrap()</span>;
+            guard.next()
+        }
+        {
+            None =&gt; { return; }
+            Some((i, band)) =&gt; { render(band, ...); }
+        }
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Dynamically allocated bands</h2><pre><code>scope.spawn(|| {
+    loop {
+        match {
+            let mut <span class="highlighted">guard</span> = bands.lock().unwrap();
+            guard.next()
+        }
+        {
+            None =&gt; { return; }
+            Some((i, band)) =&gt; { render(band, ...); }
+        }
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Dynamically allocated bands</h2><pre><code>scope.spawn(|| {
+    loop {
+        match {
+            let mut guard = bands.lock().unwrap();
+            <span class="highlighted">guard.next()</span>
+        }
+        {
+            None =&gt; { return; }
+            Some((i, band)) =&gt; { render(band, ...); }
+        }
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Dynamically allocated bands</h2><pre><code>scope.spawn(|| {
+    loop {
+        match {
+            let mut guard = bands.lock().unwrap();
+            guard.next()
+        }
+        {
+            <span class="highlighted">None =&gt; { return; }</span>
+            Some((i, band)) =&gt; { render(band, ...); }
+        }
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Dynamically allocated bands</h2><pre><code>scope.spawn(|| {
+    loop {
+        match {
+            let mut guard = bands.lock().unwrap();
+            guard.next()
+        }
+        {
+            None =&gt; { return; }
+            <span class="highlighted">Some((i, band)) =&gt; { render(band, ...); }</span>
+        }
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>dynamic band allocation</h2><img class="gnuplot" src="images/mandelbrot-dynamic-8.png"/></div></section><section class="slide"><div><h2>dynamic band allocation</h2><img class="gnuplot" src="images/mandelbrot-dynamic-16.png"/></div></section><section class="slide"><div><h2>dynamic band allocation</h2><img class="gnuplot" src="images/mandelbrot-dynamic-100.png"/></div></section><div class="progress"><div/></div><script src="shower/shower.min.js"></script></body></html>

@@ -267,6 +267,7 @@ callout_pattern = re.compile(r"`([^`\$]*)`(.)|`([^`\$]*)\$([^`\$]+)\$(.)([^`\$]*
 
 class CodeCallout(Slide):
     def __init__(self, title, code):
+        super(CodeCallout, self).__init__(title)
         self.title = title
         self.code = clean_text(code)
 
@@ -330,3 +331,17 @@ class CodeCallout(Slide):
             slides.append(elt('section', { 'class': 'slide' }, div))
 
         return slides
+
+class GnuPlot(Slide):
+    def __init__(self, title, slide):
+        self.title = title
+        self.slide = slide
+
+    def render(self, pres):
+        elt = pres.elt
+
+        return elt('section', { 'class': 'slide' },
+                   elt('div', {},
+                       elt('h2', {}, *dumb_markdown(pres, self.title)),
+                       elt('img', { 'class': 'gnuplot', 'src': self.slide })))
+

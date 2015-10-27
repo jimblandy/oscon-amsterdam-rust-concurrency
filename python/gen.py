@@ -313,6 +313,159 @@ add(Slide('What does this show?',
                  "We can throw pointers around between threads without fear.",
                  u"Concurrent Rust programs are still non-deterministic, but the non-determinism occurs only at operations designed for it—not just anywhere.").reveal()))
 
+for i in xrange(0, 9):
+    add(Slide('A bit of pure math',
+              Picture('images/squaring-{}.svg'.format(i))))
+
+add(Slide('a variation',
+          Code("""
+              fn (c: f64) {
+                  z = 0;
+                  loop {
+                      z = z*z + c;
+                  }
+              }
+              """),
+          Para(u"Unless -2 ≤ c ≤ 0.25, z escapes.").reveal()))
+
+add(Slide('a Complex variation',
+          Code("""
+              fn (c: Complex<f64>) {
+                  z = Complex { re: 0., im: 0. };
+                  loop {
+                      z = z*z + c;
+                  }
+              }
+              """),
+          Para(u"... it's complicated.").reveal()))
+
+# ./target/release/mandelbrot ~/rust/amsterdam/images/mandelbrot.png 1024x768 -2.75,1.20 1.25,-1.80
+add(BigPicture('images/mandelbrot.png'))
+
+add(CodeCallout('the Mandelbrot escape calculation', """
+    fn escapes(c: Complex<f64>, `limit: u32`2) -> `Option<u32>`1 {
+        let mut z = Complex { re: 0.0, im: 0.0 };
+        `for i in 0..limit`2 {
+            z = z*z + c;
+            `if z.norm_sqr() > 4.0`3 {
+                return Some(i);
+            }
+        }
+
+        `return None;`4
+    }
+    """))
+
+add(CodeCallout('mapping pixels to points', """
+    fn pixel_to_point(`bounds: (usize, usize)`1,
+                      `pixel:  (usize, usize)`2,
+                      `ul: (f64, f64)`3,
+                      `lr: (f64, f64)`4)
+        -> `(f64, f64)`5
+    {
+        let (width, height) = (`lr.0`6 - `ul.0`6,
+                               `ul.1`6 - `lr.1`6);
+        (`ul.0`6 + `pixel.0`6 `as f64`7 * width  / `bounds.0`6 `as f64`7,
+         `ul.1`6 - `pixel.1`6 `as f64`7 * height / `bounds.1`6 `as f64`7)
+    }
+    """))
+
+add(CodeCallout('rendering the set', """
+    fn render(pixels: `&mut [u8]`1, bounds: (usize, usize),
+              ul: (f64, f64), lr: (f64, f64)) {
+       `for r in 0 .. bounds.1`2 {
+          `for c in 0 .. bounds.0`3 {
+             let pt = `pixel_to_point(bounds, (c, r), ul, lr)`4;
+             let pt = `Complex { re: pt.0, im: pt.1 }`5;
+             `pixels[r * bounds.0 + c]`9 =
+                match `escapes(pt, 255)`6 {
+                   `None => 0`7,
+                   `Some(count) => 255 - count as u8`8
+                };
+          }
+       }
+    }
+    """))
+
+add(CodeCallout('writing the image file', """
+    fn write_bitmap(filename: &str,
+                    pixels: &[u8],
+                    bounds: (usize, usize))
+        -> Result<()>
+    {
+        let output = try!(`File::create(filename)`1);
+        let encoder = `PNGEncoder::new(output)`2;
+        try!(`encoder.encode`3(pixels,
+                            bounds.0 as u32, bounds.1 as u32,
+                            `ColorType::Gray(8)`4));
+        Ok(())
+    }
+    """))
+
+add(Slide('banding the Mandelbrot',
+          Picture('images/sliced-mandelbrot.svg')))
+
+add(CodeCallout('banded driver', """
+    let bands `: Vec<_>`3
+        = `pixels.chunks_mut`1(`band_rows * bounds.0`2).collect();
+    `crossbeam::scope`4(|scope| {
+        for `(i, band)`6 in `bands.into_iter()`5.`enumerate()`6 {
+            let top = band_rows * i;
+            let height = band.len() / bounds.0;
+            let band_bounds = (bounds.0, height);
+            let (band_ul, band_lr) = ...;
+            `scope.spawn`7(move || {
+                `render(band, band_bounds, band_ul, band_lr)`8;
+            });
+        }
+    });
+    """))
+
+add(GnuPlot('banded Mandelbrot speedup', 'images/mandelbrot-8-no-ideal.png'))
+add(GnuPlot('banded Mandelbrot speedup', 'images/mandelbrot-8.png'))
+add(GnuPlot('banded Mandelbrot speedup', 'images/mandelbrot-16.png'))
+add(GnuPlot('banded Mandelbrot speedup', 'images/mandelbrot-100.png'))
+
+add(Slide('Not all bands are the same',
+          Picture('images/sliced-mandelbrot.svg')))
+
+add(GnuPlot('banded Mandelbrot speedup', 'images/mandelbrot-100.png'))
+add(GnuPlot('banded Mandelbrot speedup', 'images/mandelbrot-1000.png'))
+
+add(Slide('dynamic band allocation',
+          Picture('images/dynamic-sliced-mandelbrot.svg')))
+
+add(CodeCallout('Dynamically allocated bands', """
+    let bands =
+        `Mutex::new`2(`pixels.chunks_mut`1(band_rows * bounds.0)
+                   .enumerate());
+    crossbeam::scope(|scope| {
+        `for i in 0..num_threads`3 {
+            scope.spawn(|| { ... });
+        }
+    });
+    """))
+
+add(CodeCallout('Dynamically allocated bands', """
+    scope.spawn(|| {
+        loop {
+            match {
+                let mut `guard`2 = `bands.lock().unwrap()`1;
+                `guard.next()`3
+            }
+            {
+                `None => { return; }`4
+                `Some((i, band)) => { render(band, ...); }`5
+            }
+        }
+    });
+    """))
+
+add(GnuPlot('dynamic band allocation', 'images/mandelbrot-dynamic-8.png'))
+add(GnuPlot('dynamic band allocation', 'images/mandelbrot-dynamic-16.png'))
+add(GnuPlot('dynamic band allocation', 'images/mandelbrot-dynamic-100.png'))
+
+
 with codecs.open('slides.html', 'w', 'utf-8') as f:
     pr.render(f)
 

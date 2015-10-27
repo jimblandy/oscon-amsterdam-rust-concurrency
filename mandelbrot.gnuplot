@@ -111,7 +111,7 @@ plot [0:100] [0:dynamic_limit] \
 
 atomic_limit = 33000
 
-set output 'images/mandelbrot-dynamic-16.png'
+set output 'images/mandelbrot-lockfree-16.png'
 plot [0:16] [0:atomic_limit] \
      'mandelbrot-dynamic.data' \
          with points linewidth 3 \
