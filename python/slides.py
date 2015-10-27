@@ -201,7 +201,7 @@ class Points(Content):
         elt = pres.elt
         ul = elt('ul', {})
         for point in self.points:
-            li = elt('li', {}, point)
+            li = elt('li', {}, *dumb_markdown(pres, point))
             if self.reveal_flag:
                 li.setAttribute('class', 'next')
             ul.appendChild(li)

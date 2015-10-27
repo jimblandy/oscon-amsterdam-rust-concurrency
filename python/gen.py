@@ -18,16 +18,16 @@ add(BigPoint("""
     """))
 
 add(Slide('Why Rust?',
-          Points('safety: no dangling pointers, no buffer overruns',
-                 'performance: the programmer has control',
-                 'concurrency: exploit multi-threaded machines')))
+          Points('*safety*: no dangling pointers, no buffer overruns',
+                 '*performance*: the programmer has control',
+                 '*concurrency*: exploit multi-threaded machines')))
 
 add(Slide('How does Rust accomplish those goals?',
           Points('statically typed language',
                  'ahead-of-time compiler (no JIT)',
-                 'memory freed at well-defined points (no GC)',
-                 u'“traits” capture common characteristics of types',
-                 'generic functions everywhere, compiled by specialization',
+                 'memory is freed at well-defined points (no GC)',
+                 u'*traits* capture common characteristics of types',
+                 'generic functions used everywhere, compiled by specialization',
                  'generic type parameters checked by traits')
           .reveal()))
 
@@ -38,8 +38,8 @@ add(Slide('Rust aims to compete with C++',
           you don’t use, you don’t pay for. And further: What you do use, you
           couldn’t hand code any better.
 
-          """, 'Bjarne Stroustrup'),
-          Para("This is Rust's principle as well.").reveal()))
+          """, u'—Bjarne Stroustrup'),
+          Para("Rust adopts this principle as well.").reveal()))
 
 add(CodeCallout('A simple Rust function', """
 
@@ -112,7 +112,7 @@ add(CodeCallout('Shareable references and mutable references', """
 
 add(CodeCallout('A single-threaded grep', """
 
-    fn grep(path: &str, pattern: &str) -> `Result<$()$2>`1 {
+    fn grep(path: &str, pattern: &str) -> `std::io::Result<$()$2>`1 {
         let file = `try!`3(File::open(path));
         let buffered = `BufReader::new(file);`4
         `for line in buffered.lines()`5 {
@@ -128,7 +128,7 @@ add(CodeCallout('A single-threaded grep', """
 
 add(CodeCallout('A single-threaded grep', """
 
-    fn grep(path: &str, pattern: &str) -> Result<()> {
+    fn grep(path: &str, pattern: &str) -> std::io::Result<()> {
         let file = try!(File::open(path));
         let buffered = BufReader::new(file);
         for line in buffered.lines() {
@@ -156,6 +156,8 @@ add(CodeCallout('A single-threaded grep', """
     }
 
     """))
+
+add(Slide("Let's do it concurrently!"))
 
 add(Slide('Thread Pools',
           Picture('images/thread-pool.svg')))

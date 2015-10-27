@@ -17,10 +17,10 @@
                                    }
                            </style></div></section><section class="slide big"><div><p/><p>Rust makes concurrent designs easier to explore, implement, and maintain, by
 guaranteeing the absence of data races and memory corruption.
-</p></div></section><section class="slide"><div><h2>Why Rust?</h2><ul><li>safety: no dangling pointers, no buffer overruns</li><li>performance: the programmer has control</li><li>concurrency: exploit multi-threaded machines</li></ul></div></section><section class="slide"><div><h2>How does Rust accomplish those goals?</h2><ul><li class="next">statically typed language</li><li class="next">ahead-of-time compiler (no JIT)</li><li class="next">memory freed at well-defined points (no GC)</li><li class="next">“traits” capture common characteristics of types</li><li class="next">generic functions everywhere, compiled by specialization</li><li class="next">generic type parameters checked by traits</li></ul></div></section><section class="slide"><div><h2>Rust aims to compete with C++</h2><figure><blockquote><p>In general, C++ implementations obey the zero-overhead principle: What
+</p></div></section><section class="slide"><div><h2>Why Rust?</h2><ul><li><b>safety</b>: no dangling pointers, no buffer overruns</li><li><b>performance</b>: the programmer has control</li><li><b>concurrency</b>: exploit multi-threaded machines</li></ul></div></section><section class="slide"><div><h2>How does Rust accomplish those goals?</h2><ul><li class="next">statically typed language</li><li class="next">ahead-of-time compiler (no JIT)</li><li class="next">memory is freed at well-defined points (no GC)</li><li class="next"><b>traits</b> capture common characteristics of types</li><li class="next">generic functions used everywhere, compiled by specialization</li><li class="next">generic type parameters checked by traits</li></ul></div></section><section class="slide"><div><h2>Rust aims to compete with C++</h2><figure><blockquote><p>In general, C++ implementations obey the zero-overhead principle: What
 you don’t use, you don’t pay for. And further: What you do use, you
 couldn’t hand code any better.
-</p></blockquote><figcaption>Bjarne Stroustrup</figcaption></figure><p class="next">This is Rust's principle as well.
+</p></blockquote><figcaption>—Bjarne Stroustrup</figcaption></figure><p class="next">Rust adopts this principle as well.
 </p></div></section><section class="slide"><div><h2>A simple Rust function</h2><pre><code>fn gcd(mut n: u64, mut m: u64) -&gt; u64 {
     assert!(n != 0 &amp;&amp; m != 0);
     while m != 0 {
@@ -212,7 +212,7 @@ let shareable = &amp;i;
 
 let mut j = 1729;
 let mutable = <span class="highlighted">&amp;mut j</span>;
-</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; std::io::Result&lt;()&gt; {
     let file = try!(File::open(path));
     let buffered = BufReader::new(file);
     for line in buffered.lines() {
@@ -223,7 +223,7 @@ let mutable = <span class="highlighted">&amp;mut j</span>;
     }
     return Ok(());
 }
-</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; <span class="highlighted">Result&lt;()&gt;</span> {
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; <span class="highlighted">std::io::Result&lt;()&gt;</span> {
     let file = try!(File::open(path));
     let buffered = BufReader::new(file);
     for line in buffered.lines() {
@@ -234,7 +234,7 @@ let mutable = <span class="highlighted">&amp;mut j</span>;
     }
     return Ok(());
 }
-</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;<span class="highlighted">()</span>&gt; {
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; std::io::Result&lt;<span class="highlighted">()</span>&gt; {
     let file = try!(File::open(path));
     let buffered = BufReader::new(file);
     for line in buffered.lines() {
@@ -245,7 +245,7 @@ let mutable = <span class="highlighted">&amp;mut j</span>;
     }
     return Ok(());
 }
-</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; std::io::Result&lt;()&gt; {
     let file = <span class="highlighted">try!</span>(File::open(path));
     let buffered = BufReader::new(file);
     for line in buffered.lines() {
@@ -256,7 +256,7 @@ let mutable = <span class="highlighted">&amp;mut j</span>;
     }
     return Ok(());
 }
-</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; std::io::Result&lt;()&gt; {
     let file = try!(File::open(path));
     let buffered = <span class="highlighted">BufReader::new(file);</span>
     for line in buffered.lines() {
@@ -267,7 +267,7 @@ let mutable = <span class="highlighted">&amp;mut j</span>;
     }
     return Ok(());
 }
-</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; std::io::Result&lt;()&gt; {
     let file = try!(File::open(path));
     let buffered = BufReader::new(file);
     <span class="highlighted">for line in buffered.lines()</span> {
@@ -278,7 +278,7 @@ let mutable = <span class="highlighted">&amp;mut j</span>;
     }
     return Ok(());
 }
-</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; std::io::Result&lt;()&gt; {
     let file = try!(File::open(path));
     let buffered = BufReader::new(file);
     for line in buffered.lines() {
@@ -289,7 +289,7 @@ let mutable = <span class="highlighted">&amp;mut j</span>;
     }
     return Ok(());
 }
-</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; std::io::Result&lt;()&gt; {
     let file = try!(File::open(path));
     let buffered = BufReader::new(file);
     for line in buffered.lines() {
@@ -300,7 +300,7 @@ let mutable = <span class="highlighted">&amp;mut j</span>;
     }
     return Ok(());
 }
-</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; std::io::Result&lt;()&gt; {
     let file = try!(File::open(path));
     let buffered = BufReader::new(file);
     for line in buffered.lines() {
@@ -311,7 +311,7 @@ let mutable = <span class="highlighted">&amp;mut j</span>;
     }
     <span class="highlighted">return Ok(());</span>
 }
-</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; std::io::Result&lt;()&gt; {
     let file = try!(File::open(path));
     let buffered = BufReader::new(file);
     for line in buffered.lines() {
@@ -372,7 +372,7 @@ let mutable = <span class="highlighted">&amp;mut j</span>;
         <span class="highlighted">Ok(_) =&gt; ()</span>
     }
 }
-</code></pre></div></section><section class="slide"><div><h2>Thread Pools</h2><img alt="" src="images/thread-pool.svg"/></div></section><section class="slide"><div><h2>Channels</h2><img alt="" src="images/channels.svg"/></div></section><section class="slide"><div><h2>Forbidding data races</h2><p>Data races can only occur when data is both shared and mutable. So you can have either:
+</code></pre></div></section><section class="slide"><div><h2>Let's do it concurrently!</h2></div></section><section class="slide"><div><h2>Thread Pools</h2><img alt="" src="images/thread-pool.svg"/></div></section><section class="slide"><div><h2>Channels</h2><img alt="" src="images/channels.svg"/></div></section><section class="slide"><div><h2>Forbidding data races</h2><p>Data races can only occur when data is both shared and mutable. So you can have either:
 </p><center>Sharing without mutability
 </center><center><b>or</b>
 </center><center>Mutability without sharing
