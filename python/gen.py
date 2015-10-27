@@ -102,6 +102,14 @@ add(CodeCallout('Results from fallible operations', """
     }
                     """))
 
+add(CodeCallout('Shareable references and mutable references', """
+    let i = 42;
+    let shareable = `&i`1;
+
+    let mut j = 1729;
+    let mutable = `&mut j`2;
+"""))
+
 add(CodeCallout('A single-threaded grep', """
 
     fn grep(path: &str, pattern: &str) -> `Result<$()$2>`1 {
@@ -319,7 +327,7 @@ for i in xrange(0, 9):
 
 add(Slide('a variation',
           Code("""
-              fn (c: f64) {
+              fn m(c: f64) {
                   z = 0;
                   loop {
                       z = z*z + c;
@@ -330,7 +338,7 @@ add(Slide('a variation',
 
 add(Slide('a Complex variation',
           Code("""
-              fn (c: Complex<f64>) {
+              fn m(c: Complex<f64>) {
                   z = Complex { re: 0., im: 0. };
                   loop {
                       z = z*z + c;
@@ -440,7 +448,7 @@ add(CodeCallout('Dynamically allocated bands', """
         `Mutex::new`2(`pixels.chunks_mut`1(band_rows * bounds.0)
                    .enumerate());
     crossbeam::scope(|scope| {
-        `for i in 0..num_threads`3 {
+        `for i in 0..8`3 {
             scope.spawn(|| { ... });
         }
     });
@@ -464,6 +472,89 @@ add(CodeCallout('Dynamically allocated bands', """
 add(GnuPlot('dynamic band allocation', 'images/mandelbrot-dynamic-8.png'))
 add(GnuPlot('dynamic band allocation', 'images/mandelbrot-dynamic-16.png'))
 add(GnuPlot('dynamic band allocation', 'images/mandelbrot-dynamic-100.png'))
+
+add(BigPoint("Something is still slightly unsatisfying..."))
+
+add(CodeCallout('A lock-free chunk iterator', """
+    use std::sync::atomic::{`AtomicUsize`!, Ordering};
+    use std::sync::atomic::Ordering::*;
+
+    `struct AtomicChunksMut`1<`'a`5, T: `'a`5> {
+        `slice: &$'a$5 [T],`2
+        `step: usize,`3
+        `next: AtomicUsize`4
+    }
+    """))
+
+add(CodeCallout('A lock-free chunk iterator', """
+    `impl`1<'a, T> `AtomicChunksMut`1<'a, T> {
+        pub `fn new`2(...) { ... }
+        unsafe `fn next`3(...) { ... }
+    }
+    """))
+
+add(CodeCallout('A lock-free chunk iterator', """
+    impl<'a, T> AtomicChunksMut<'a, T> {
+        `pub fn new`2(slice: &'a mut [T], step: usize)
+                  -> AtomicChunksMut<'a, T> {
+            `AtomicChunksMut {             `3
+            `   slice: slice,              `3
+            `    step: step,               `3
+            `    next: $AtomicUsize::new$4(0) `3
+            `}                             `3
+        }
+        ...
+    }
+    """))
+
+add(CodeCallout('A lock-free chunk iterator', """
+    `unsafe`D fn next(&self) -> `Option<(usize, $&'a mut [T]$C)>`1 {
+        `loop`B {
+            let cur = `self.next.load(SeqCst)`3;
+            if `cur == self.slice.len()`4 { return None; }
+            let end = `min(cur + self.step, self.slice.len())`5;
+            if `self.next`7.`compare_and_swap`6(`cur`7, `end`8, SeqCst)
+               `== cur`9 {
+               return `Some((cur / self.step,                   `A
+                      `      $transmute$C(&self.slice[cur..end])));`A
+            }
+        }
+    }
+    """))
+
+add(CodeCallout('A lock-free chunk iterator', """
+    impl<'a, 'b, T> `Iterator`1 for `&'b AtomicChunksMut<'a, T>`3 {
+        `type Item`1 = (usize, &'a mut [T]);
+        `fn next`1(&mut self) -> `Option<Self::Item>`2 {
+            unsafe { `(*self).next()`4 }
+        }
+    }
+    """))
+
+add(CodeCallout('Lock-free dynamic bands', """
+    let bands = `AtomicChunksMut::new`1(&mut pixels, bounds.0);
+    crossbeam::scope(|scope| {
+        `for i in 0..8`2 {
+            scope.spawn(|| {
+                `for (i, band) in $&bands$2`3 {
+                    ...
+                    render(band, ...);
+                }
+            });
+        }
+    });
+    """))
+
+add(GnuPlot('dynamic band allocation', 'images/mandelbrot-lockfree-16.png'))
+
+add(Slide('Summing up',
+          Points('Message-passing works',
+                 'Mutexes work.',
+                 'Atomics work.',
+                 'Never a data race, if you stick to safe code.',
+                 "Rust's concurrency primitives are open-ended: when you know what you're doing, you can build new safe primitives from unsafe implementations."
+                 "Benchmark, and you learn cool stuff.").reveal()))
+
 
 
 with codecs.open('slides.html', 'w', 'utf-8') as f:

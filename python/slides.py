@@ -200,13 +200,11 @@ class Points(Content):
     def render(self, pres):
         elt = pres.elt
         ul = elt('ul', {})
-        first = True
         for point in self.points:
             li = elt('li', {}, point)
-            if self.reveal_flag and not first:
+            if self.reveal_flag:
                 li.setAttribute('class', 'next')
             ul.appendChild(li)
-            first = False
         return ul
 
 class Quote(Content):

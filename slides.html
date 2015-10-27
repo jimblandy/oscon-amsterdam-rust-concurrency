@@ -17,7 +17,7 @@
                                    }
                            </style></div></section><section class="slide big"><div><p/><p>Rust makes concurrent designs easier to explore, implement, and maintain, by
 guaranteeing the absence of data races and memory corruption.
-</p></div></section><section class="slide"><div><h2>Why Rust?</h2><ul><li>safety: no dangling pointers, no buffer overruns</li><li>performance: the programmer has control</li><li>concurrency: exploit multi-threaded machines</li></ul></div></section><section class="slide"><div><h2>How does Rust accomplish those goals?</h2><ul><li>statically typed language</li><li class="next">ahead-of-time compiler (no JIT)</li><li class="next">memory freed at well-defined points (no GC)</li><li class="next">“traits” capture common characteristics of types</li><li class="next">generic functions everywhere, compiled by specialization</li><li class="next">generic type parameters checked by traits</li></ul></div></section><section class="slide"><div><h2>Rust aims to compete with C++</h2><figure><blockquote><p>In general, C++ implementations obey the zero-overhead principle: What
+</p></div></section><section class="slide"><div><h2>Why Rust?</h2><ul><li>safety: no dangling pointers, no buffer overruns</li><li>performance: the programmer has control</li><li>concurrency: exploit multi-threaded machines</li></ul></div></section><section class="slide"><div><h2>How does Rust accomplish those goals?</h2><ul><li class="next">statically typed language</li><li class="next">ahead-of-time compiler (no JIT)</li><li class="next">memory freed at well-defined points (no GC)</li><li class="next">“traits” capture common characteristics of types</li><li class="next">generic functions everywhere, compiled by specialization</li><li class="next">generic type parameters checked by traits</li></ul></div></section><section class="slide"><div><h2>Rust aims to compete with C++</h2><figure><blockquote><p>In general, C++ implementations obey the zero-overhead principle: What
 you don’t use, you don’t pay for. And further: What you do use, you
 couldn’t hand code any better.
 </p></blockquote><figcaption>Bjarne Stroustrup</figcaption></figure><p class="next">This is Rust's principle as well.
@@ -197,6 +197,21 @@ enum Result&lt;T, E&gt; {
     Ok(T),
     <span class="highlighted">Err(E)</span>,
 }
+</code></pre></div></section><section class="slide"><div><h2>Shareable references and mutable references</h2><pre><code>let i = 42;
+let shareable = &amp;i;
+
+let mut j = 1729;
+let mutable = &amp;mut j;
+</code></pre></div></section><section class="slide"><div><h2>Shareable references and mutable references</h2><pre><code>let i = 42;
+let shareable = <span class="highlighted">&amp;i</span>;
+
+let mut j = 1729;
+let mutable = &amp;mut j;
+</code></pre></div></section><section class="slide"><div><h2>Shareable references and mutable references</h2><pre><code>let i = 42;
+let shareable = &amp;i;
+
+let mut j = 1729;
+let mutable = <span class="highlighted">&amp;mut j</span>;
 </code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
     let file = try!(File::open(path));
     let buffered = BufReader::new(file);
@@ -707,14 +722,14 @@ pool.scoped(<span class="highlighted">|scope| { ... }</span>);
         }
     }
 }
-</code></pre></div></section><section class="slide"><div><h2>It works!</h2></div></section><section class="slide"><div><h2>What does this show?</h2><ul><li>Worker pools can manage large tasks with a bounded number of threads.</li><li class="next">Channels are a convenient way to carry messages between threads.</li><li class="next">We can throw pointers around between threads without fear.</li><li class="next">Concurrent Rust programs are still non-deterministic, but the non-determinism occurs only at operations designed for it—not just anywhere.</li></ul></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-0.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-1.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-2.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-3.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-4.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-5.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-6.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-7.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-8.svg"/></div></section><section class="slide"><div><h2>a variation</h2><pre><code>fn (c: f64) {
+</code></pre></div></section><section class="slide"><div><h2>It works!</h2></div></section><section class="slide"><div><h2>What does this show?</h2><ul><li class="next">Worker pools can manage large tasks with a bounded number of threads.</li><li class="next">Channels are a convenient way to carry messages between threads.</li><li class="next">We can throw pointers around between threads without fear.</li><li class="next">Concurrent Rust programs are still non-deterministic, but the non-determinism occurs only at operations designed for it—not just anywhere.</li></ul></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-0.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-1.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-2.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-3.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-4.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-5.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-6.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-7.svg"/></div></section><section class="slide"><div><h2>A bit of pure math</h2><img alt="" src="images/squaring-8.svg"/></div></section><section class="slide"><div><h2>a variation</h2><pre><code>fn m(c: f64) {
     z = 0;
     loop {
         z = z*z + c;
     }
 }
 </code></pre><p class="next">Unless -2 ≤ c ≤ 0.25, z escapes.
-</p></div></section><section class="slide"><div><h2>a Complex variation</h2><pre><code>fn (c: Complex&lt;f64&gt;) {
+</p></div></section><section class="slide"><div><h2>a Complex variation</h2><pre><code>fn m(c: Complex&lt;f64&gt;) {
     z = Complex { re: 0., im: 0. };
     loop {
         z = z*z + c;
@@ -1185,7 +1200,7 @@ crossbeam::scope(|scope| {
     Mutex::new(pixels.chunks_mut(band_rows * bounds.0)
                .enumerate());
 crossbeam::scope(|scope| {
-    for i in 0..num_threads {
+    for i in 0..8 {
         scope.spawn(|| { ... });
     }
 });
@@ -1193,7 +1208,7 @@ crossbeam::scope(|scope| {
     Mutex::new(<span class="highlighted">pixels.chunks_mut</span>(band_rows * bounds.0)
                .enumerate());
 crossbeam::scope(|scope| {
-    for i in 0..num_threads {
+    for i in 0..8 {
         scope.spawn(|| { ... });
     }
 });
@@ -1201,7 +1216,7 @@ crossbeam::scope(|scope| {
     <span class="highlighted">Mutex::new</span>(pixels.chunks_mut(band_rows * bounds.0)
                .enumerate());
 crossbeam::scope(|scope| {
-    for i in 0..num_threads {
+    for i in 0..8 {
         scope.spawn(|| { ... });
     }
 });
@@ -1209,7 +1224,7 @@ crossbeam::scope(|scope| {
     Mutex::new(pixels.chunks_mut(band_rows * bounds.0)
                .enumerate());
 crossbeam::scope(|scope| {
-    <span class="highlighted">for i in 0..num_threads</span> {
+    <span class="highlighted">for i in 0..8</span> {
         scope.spawn(|| { ... });
     }
 });
@@ -1285,4 +1300,351 @@ crossbeam::scope(|scope| {
         }
     }
 });
-</code></pre></div></section><section class="slide"><div><h2>dynamic band allocation</h2><img class="gnuplot" src="images/mandelbrot-dynamic-8.png"/></div></section><section class="slide"><div><h2>dynamic band allocation</h2><img class="gnuplot" src="images/mandelbrot-dynamic-16.png"/></div></section><section class="slide"><div><h2>dynamic band allocation</h2><img class="gnuplot" src="images/mandelbrot-dynamic-100.png"/></div></section><div class="progress"><div/></div><script src="shower/shower.min.js"></script></body></html>
+</code></pre></div></section><section class="slide"><div><h2>dynamic band allocation</h2><img class="gnuplot" src="images/mandelbrot-dynamic-8.png"/></div></section><section class="slide"><div><h2>dynamic band allocation</h2><img class="gnuplot" src="images/mandelbrot-dynamic-16.png"/></div></section><section class="slide"><div><h2>dynamic band allocation</h2><img class="gnuplot" src="images/mandelbrot-dynamic-100.png"/></div></section><section class="slide big"><div><p/><p>Something is still slightly unsatisfying...
+</p></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::Ordering::*;
+
+struct AtomicChunksMut&lt;'a, T: 'a&gt; {
+    slice: &amp;'a [T],
+    step: usize,
+    next: AtomicUsize
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>use std::sync::atomic::{<span class="highlighted">AtomicUsize</span>, Ordering};
+use std::sync::atomic::Ordering::*;
+
+struct AtomicChunksMut&lt;'a, T: 'a&gt; {
+    slice: &amp;'a [T],
+    step: usize,
+    next: AtomicUsize
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::Ordering::*;
+
+<span class="highlighted">struct AtomicChunksMut</span>&lt;'a, T: 'a&gt; {
+    slice: &amp;'a [T],
+    step: usize,
+    next: AtomicUsize
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::Ordering::*;
+
+struct AtomicChunksMut&lt;'a, T: 'a&gt; {
+    <span class="highlighted">slice: &amp;'a [T],</span>
+    step: usize,
+    next: AtomicUsize
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::Ordering::*;
+
+struct AtomicChunksMut&lt;'a, T: 'a&gt; {
+    slice: &amp;'a [T],
+    <span class="highlighted">step: usize,</span>
+    next: AtomicUsize
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::Ordering::*;
+
+struct AtomicChunksMut&lt;'a, T: 'a&gt; {
+    slice: &amp;'a [T],
+    step: usize,
+    <span class="highlighted">next: AtomicUsize</span>
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::Ordering::*;
+
+struct AtomicChunksMut&lt;<span class="highlighted">'a</span>, T: <span class="highlighted">'a</span>&gt; {
+    slice: &amp;<span class="highlighted">'a</span> [T],
+    step: usize,
+    next: AtomicUsize
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, T&gt; AtomicChunksMut&lt;'a, T&gt; {
+    pub fn new(...) { ... }
+    unsafe fn next(...) { ... }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code><span class="highlighted">impl</span>&lt;'a, T&gt; <span class="highlighted">AtomicChunksMut</span>&lt;'a, T&gt; {
+    pub fn new(...) { ... }
+    unsafe fn next(...) { ... }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, T&gt; AtomicChunksMut&lt;'a, T&gt; {
+    pub <span class="highlighted">fn new</span>(...) { ... }
+    unsafe fn next(...) { ... }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, T&gt; AtomicChunksMut&lt;'a, T&gt; {
+    pub fn new(...) { ... }
+    unsafe <span class="highlighted">fn next</span>(...) { ... }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, T&gt; AtomicChunksMut&lt;'a, T&gt; {
+    pub fn new(slice: &amp;'a mut [T], step: usize)
+              -&gt; AtomicChunksMut&lt;'a, T&gt; {
+        AtomicChunksMut {             
+           slice: slice,              
+            step: step,               
+            next: AtomicUsize::new(0) 
+        }                             
+    }
+    ...
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, T&gt; AtomicChunksMut&lt;'a, T&gt; {
+    <span class="highlighted">pub fn new</span>(slice: &amp;'a mut [T], step: usize)
+              -&gt; AtomicChunksMut&lt;'a, T&gt; {
+        AtomicChunksMut {             
+           slice: slice,              
+            step: step,               
+            next: AtomicUsize::new(0) 
+        }                             
+    }
+    ...
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, T&gt; AtomicChunksMut&lt;'a, T&gt; {
+    pub fn new(slice: &amp;'a mut [T], step: usize)
+              -&gt; AtomicChunksMut&lt;'a, T&gt; {
+        <span class="highlighted">AtomicChunksMut {             </span>
+        <span class="highlighted">   slice: slice,              </span>
+        <span class="highlighted">    step: step,               </span>
+        <span class="highlighted">    next: AtomicUsize::new(0) </span>
+        <span class="highlighted">}                             </span>
+    }
+    ...
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, T&gt; AtomicChunksMut&lt;'a, T&gt; {
+    pub fn new(slice: &amp;'a mut [T], step: usize)
+              -&gt; AtomicChunksMut&lt;'a, T&gt; {
+        AtomicChunksMut {             
+           slice: slice,              
+            step: step,               
+            next: <span class="highlighted">AtomicUsize::new</span>(0) 
+        }                             
+    }
+    ...
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; Option&lt;(usize, &amp;'a mut [T])&gt; {
+    loop {
+        let cur = self.next.load(SeqCst);
+        if cur == self.slice.len() { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if self.next.compare_and_swap(cur, end, SeqCst)
+           == cur {
+           return Some((cur / self.step,                   
+                        transmute(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; <span class="highlighted">Option&lt;(usize, &amp;'a mut [T])&gt;</span> {
+    loop {
+        let cur = self.next.load(SeqCst);
+        if cur == self.slice.len() { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if self.next.compare_and_swap(cur, end, SeqCst)
+           == cur {
+           return Some((cur / self.step,                   
+                        transmute(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; Option&lt;(usize, &amp;'a mut [T])&gt; {
+    loop {
+        let cur = <span class="highlighted">self.next.load(SeqCst)</span>;
+        if cur == self.slice.len() { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if self.next.compare_and_swap(cur, end, SeqCst)
+           == cur {
+           return Some((cur / self.step,                   
+                        transmute(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; Option&lt;(usize, &amp;'a mut [T])&gt; {
+    loop {
+        let cur = self.next.load(SeqCst);
+        if <span class="highlighted">cur == self.slice.len()</span> { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if self.next.compare_and_swap(cur, end, SeqCst)
+           == cur {
+           return Some((cur / self.step,                   
+                        transmute(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; Option&lt;(usize, &amp;'a mut [T])&gt; {
+    loop {
+        let cur = self.next.load(SeqCst);
+        if cur == self.slice.len() { return None; }
+        let end = <span class="highlighted">min(cur + self.step, self.slice.len())</span>;
+        if self.next.compare_and_swap(cur, end, SeqCst)
+           == cur {
+           return Some((cur / self.step,                   
+                        transmute(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; Option&lt;(usize, &amp;'a mut [T])&gt; {
+    loop {
+        let cur = self.next.load(SeqCst);
+        if cur == self.slice.len() { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if self.next.<span class="highlighted">compare_and_swap</span>(cur, end, SeqCst)
+           == cur {
+           return Some((cur / self.step,                   
+                        transmute(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; Option&lt;(usize, &amp;'a mut [T])&gt; {
+    loop {
+        let cur = self.next.load(SeqCst);
+        if cur == self.slice.len() { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if <span class="highlighted">self.next</span>.compare_and_swap(<span class="highlighted">cur</span>, end, SeqCst)
+           == cur {
+           return Some((cur / self.step,                   
+                        transmute(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; Option&lt;(usize, &amp;'a mut [T])&gt; {
+    loop {
+        let cur = self.next.load(SeqCst);
+        if cur == self.slice.len() { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if self.next.compare_and_swap(cur, <span class="highlighted">end</span>, SeqCst)
+           == cur {
+           return Some((cur / self.step,                   
+                        transmute(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; Option&lt;(usize, &amp;'a mut [T])&gt; {
+    loop {
+        let cur = self.next.load(SeqCst);
+        if cur == self.slice.len() { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if self.next.compare_and_swap(cur, end, SeqCst)
+           <span class="highlighted">== cur</span> {
+           return Some((cur / self.step,                   
+                        transmute(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; Option&lt;(usize, &amp;'a mut [T])&gt; {
+    loop {
+        let cur = self.next.load(SeqCst);
+        if cur == self.slice.len() { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if self.next.compare_and_swap(cur, end, SeqCst)
+           == cur {
+           return <span class="highlighted">Some((cur / self.step,                   </span>
+                  <span class="highlighted">      transmute(&amp;self.slice[cur..end])));</span>
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; Option&lt;(usize, &amp;'a mut [T])&gt; {
+    <span class="highlighted">loop</span> {
+        let cur = self.next.load(SeqCst);
+        if cur == self.slice.len() { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if self.next.compare_and_swap(cur, end, SeqCst)
+           == cur {
+           return Some((cur / self.step,                   
+                        transmute(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>unsafe fn next(&amp;self) -&gt; Option&lt;(usize, <span class="highlighted">&amp;'a mut [T]</span>)&gt; {
+    loop {
+        let cur = self.next.load(SeqCst);
+        if cur == self.slice.len() { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if self.next.compare_and_swap(cur, end, SeqCst)
+           == cur {
+           return Some((cur / self.step,                   
+                        <span class="highlighted">transmute</span>(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code><span class="highlighted">unsafe</span> fn next(&amp;self) -&gt; Option&lt;(usize, &amp;'a mut [T])&gt; {
+    loop {
+        let cur = self.next.load(SeqCst);
+        if cur == self.slice.len() { return None; }
+        let end = min(cur + self.step, self.slice.len());
+        if self.next.compare_and_swap(cur, end, SeqCst)
+           == cur {
+           return Some((cur / self.step,                   
+                        transmute(&amp;self.slice[cur..end])));
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, 'b, T&gt; Iterator for &amp;'b AtomicChunksMut&lt;'a, T&gt; {
+    type Item = (usize, &amp;'a mut [T]);
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        unsafe { (*self).next() }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, 'b, T&gt; <span class="highlighted">Iterator</span> for &amp;'b AtomicChunksMut&lt;'a, T&gt; {
+    <span class="highlighted">type Item</span> = (usize, &amp;'a mut [T]);
+    <span class="highlighted">fn next</span>(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        unsafe { (*self).next() }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, 'b, T&gt; Iterator for &amp;'b AtomicChunksMut&lt;'a, T&gt; {
+    type Item = (usize, &amp;'a mut [T]);
+    fn next(&amp;mut self) -&gt; <span class="highlighted">Option&lt;Self::Item&gt;</span> {
+        unsafe { (*self).next() }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, 'b, T&gt; Iterator for <span class="highlighted">&amp;'b AtomicChunksMut&lt;'a, T&gt;</span> {
+    type Item = (usize, &amp;'a mut [T]);
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        unsafe { (*self).next() }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A lock-free chunk iterator</h2><pre><code>impl&lt;'a, 'b, T&gt; Iterator for &amp;'b AtomicChunksMut&lt;'a, T&gt; {
+    type Item = (usize, &amp;'a mut [T]);
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; {
+        unsafe { <span class="highlighted">(*self).next()</span> }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>Lock-free dynamic bands</h2><pre><code>let bands = AtomicChunksMut::new(&amp;mut pixels, bounds.0);
+crossbeam::scope(|scope| {
+    for i in 0..8 {
+        scope.spawn(|| {
+            for (i, band) in &amp;bands {
+                ...
+                render(band, ...);
+            }
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Lock-free dynamic bands</h2><pre><code>let bands = <span class="highlighted">AtomicChunksMut::new</span>(&amp;mut pixels, bounds.0);
+crossbeam::scope(|scope| {
+    for i in 0..8 {
+        scope.spawn(|| {
+            for (i, band) in &amp;bands {
+                ...
+                render(band, ...);
+            }
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Lock-free dynamic bands</h2><pre><code>let bands = AtomicChunksMut::new(&amp;mut pixels, bounds.0);
+crossbeam::scope(|scope| {
+    <span class="highlighted">for i in 0..8</span> {
+        scope.spawn(|| {
+            for (i, band) in <span class="highlighted">&amp;bands</span> {
+                ...
+                render(band, ...);
+            }
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>Lock-free dynamic bands</h2><pre><code>let bands = AtomicChunksMut::new(&amp;mut pixels, bounds.0);
+crossbeam::scope(|scope| {
+    for i in 0..8 {
+        scope.spawn(|| {
+            <span class="highlighted">for (i, band) in &amp;bands</span> {
+                ...
+                render(band, ...);
+            }
+        });
+    }
+});
+</code></pre></div></section><section class="slide"><div><h2>dynamic band allocation</h2><img class="gnuplot" src="images/mandelbrot-lockfree-16.png"/></div></section><section class="slide"><div><h2>Summing up</h2><ul><li class="next">Message-passing works</li><li class="next">Mutexes work.</li><li class="next">Atomics work.</li><li class="next">Never a data race, if you stick to safe code.</li><li class="next">Rust's concurrency primitives are open-ended: when you know what you're doing, you can build new safe primitives from unsafe implementations.Benchmark, and you learn cool stuff.</li></ul></div></section><div class="progress"><div/></div><script src="shower/shower.min.js"></script></body></html>
