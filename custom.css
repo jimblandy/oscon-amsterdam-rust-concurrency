@@ -4,7 +4,7 @@
 }
 
 .slide pre code {
-    line-height: 1.4;
+    line-height: 1.3;
 }
 
 .slide pre code span.highlighted {
@@ -21,4 +21,8 @@
     color: inherit;
     line-height: inherit;
     font-family: 'PT Mono', monospace;
+}
+
+.slide > div {
+    padding: 50px 100px 0;
 }

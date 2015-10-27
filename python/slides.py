@@ -178,6 +178,15 @@ class BigPicture(Slide):
                    elt('div', {},
                        elt('img', { 'src': self.image, 'alt': '' })))
 
+class Picture(Content):
+    def __init__(self, image):
+        super(Picture, self).__init__()
+        self.image = image
+
+    def render(self, pres):
+        elt = pres.elt
+        return elt('img', { 'src': self.image, 'alt': '' })
+
 class Points(Content):
     def __init__(self, *points):
         super(Points, self).__init__()
@@ -214,16 +223,22 @@ class Quote(Content):
                    elt('figcaption', {}, self.writer))
 
 class Para(Content):
-    def __init__(self, *elts):
+    def __init__(self, text):
         super(Para, self).__init__()
-        self.elts = [clean_text(p) if isinstance(p, str) else p for p in elts]
+        self.text = clean_text(text)
+        self.center_flag = False
 
     def render(self, pres):
         elt = pres.elt
-        para = elt('p', {}, *self.elts)
+        para = elt('center' if self.center_flag else 'p', {},
+                   *dumb_markdown(pres, self.text))
         if self.reveal_flag:
             para.setAttribute('class', 'next')
         return para
+
+    def center(self):
+        self.center_flag = True
+        return self
 
 class BigPoint(Slide):
     def __init__(self, text):
@@ -233,6 +248,7 @@ class BigPoint(Slide):
         elt = pres.elt
         return elt('section', { 'class': 'slide big' },
                    elt('div', {},
+                       elt('p', {}),
                        elt('p', {}, self.text)))
 
 class Code(Content):

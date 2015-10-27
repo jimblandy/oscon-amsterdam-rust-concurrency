@@ -15,7 +15,7 @@
                            #Cover p a {
                                    color:#FFF;
                                    }
-                           </style></div></section><section class="slide big"><div><p>Rust makes concurrent designs easier to explore, implement, and maintain, by
+                           </style></div></section><section class="slide big"><div><p/><p>Rust makes concurrent designs easier to explore, implement, and maintain, by
 guaranteeing the absence of data races and memory corruption.
 </p></div></section><section class="slide"><div><h2>Why Rust?</h2><ul><li>safety: no dangling pointers, no buffer overruns</li><li>performance: the programmer has control</li><li>concurrency: exploit multi-threaded machines</li></ul></div></section><section class="slide"><div><h2>How does Rust accomplish those goals?</h2><ul><li>statically typed language</li><li class="next">ahead-of-time compiler (no JIT)</li><li class="next">memory freed at well-defined points (no GC)</li><li class="next">“traits” capture common characteristics of types</li><li class="next">generic functions everywhere, compiled by specialization</li><li class="next">generic type parameters checked by traits</li></ul></div></section><section class="slide"><div><h2>Rust aims to compete with C++</h2><figure><blockquote><p>In general, C++ implementations obey the zero-overhead principle: What
 you don’t use, you don’t pay for. And further: What you do use, you
@@ -71,19 +71,19 @@ couldn’t hand code any better.
     }
  <span class="highlighted">   n   </span>
 }
-</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic datatypes</h2><pre><code>enum Option&lt;T&gt; {
+</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic types</h2><pre><code>enum Option&lt;T&gt; {
     None,
     Some(T),
 }
-</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic datatypes</h2><pre><code>enum Option<span class="highlighted">&lt;T&gt;</span> {
+</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic types</h2><pre><code>enum Option<span class="highlighted">&lt;T&gt;</span> {
     None,
     Some(T),
 }
-</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic datatypes</h2><pre><code>enum Option&lt;T&gt; {
+</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic types</h2><pre><code>enum Option&lt;T&gt; {
     <span class="highlighted">None</span>,
     Some(T),
 }
-</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic datatypes</h2><pre><code>enum Option&lt;T&gt; {
+</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic types</h2><pre><code>enum Option&lt;T&gt; {
     None,
     <span class="highlighted">Some(T)</span>,
 }
@@ -357,7 +357,12 @@ enum Result&lt;T, E&gt; {
         <span class="highlighted">Ok(_) =&gt; ()</span>
     }
 }
-</code></pre></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-home-page.png"/></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-search-results.png"/></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-scoped_threadpool.png"/></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-scoped_threadpool-dependency.png"/></div></section><section class="slide"><div><h2>The <code>Cargo.toml</code> file</h2><pre><code>[package]
+</code></pre></div></section><section class="slide"><div><h2>Thread Pools</h2><img alt="" src="images/thread-pool.svg"/></div></section><section class="slide"><div><h2>Channels</h2><img alt="" src="images/channels.svg"/></div></section><section class="slide"><div><h2>Forbidding data races</h2><p>Data races can only occur when data is both shared and mutable. So you can have either:
+</p><center>Sharing without mutability
+</center><center><b>or</b>
+</center><center>Mutability without sharing
+</center></div></section><section class="slide"><div><h2>Forbidding data races</h2><ul><li>If you send a mutable value on a channel, you must give up your pointers to it.</li><li>You can send pointers to immutable values to other threads, and both share access.</li></ul><p class="next">We'll see examples of both.
+</p></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-home-page.png"/></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-search-results.png"/></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-scoped_threadpool.png"/></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-scoped_threadpool-dependency.png"/></div></section><section class="slide"><div><h2>The <code>Cargo.toml</code> file</h2><pre><code>[package]
 name = &quot;pgrep&quot;
 version = &quot;0.1.0&quot;
 authors = [&quot;Jim Blandy &lt;jimb@red-bean.com&gt;&quot;]
@@ -371,4 +376,335 @@ authors = [&quot;Jim Blandy &lt;jimb@red-bean.com&gt;&quot;]
 
 [dependencies]
 <span class="highlighted">scoped_threadpool = &quot;0.1.6&quot;</span>
-</code></pre></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-build-pgrep.png"/></div></section><div class="progress"><div/></div><script src="shower/shower.min.js"></script></body></html>
+</code></pre></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-build-pgrep.png"/></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str,
+        results: &amp;Sender&lt;Message&gt;) -&gt; Result&lt;()&gt;
+{
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = try!(line);
+        if line.contains(pattern) {
+            results.send(Message::Hit(line)).unwrap();
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str,
+        <span class="highlighted">results: &amp;Sender&lt;Message&gt;</span>) -&gt; Result&lt;()&gt;
+{
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = try!(line);
+        if line.contains(pattern) {
+            results.send(Message::Hit(line)).unwrap();
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str,
+        results: &amp;Sender&lt;Message&gt;) -&gt; Result&lt;()&gt;
+{
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = try!(line);
+        if line.contains(pattern) {
+            <span class="highlighted">results.send(Message::Hit(line)).unwrap();</span>
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>The grep message type</h2><pre><code>enum Message&lt;'a&gt; {
+    Hit(String),
+    Done(&amp;'a str, Result&lt;()&gt;),
+}
+</code></pre></div></section><section class="slide"><div><h2>The grep message type</h2><pre><code>enum Message&lt;'a&gt; {
+    <span class="highlighted">Hit(String),</span>
+    Done(&amp;'a str, Result&lt;()&gt;),
+}
+</code></pre></div></section><section class="slide"><div><h2>The grep message type</h2><pre><code>enum Message&lt;'a&gt; {
+    Hit(String),
+    <span class="highlighted">Done(&amp;'a str, Result&lt;()&gt;),</span>
+}
+</code></pre></div></section><section class="slide"><div><h2>The grep message type</h2><pre><code>enum Message&lt;<span class="highlighted">'a</span>&gt; {
+    Hit(String),
+    Done(&amp;<span class="highlighted">'a</span> str, Result&lt;()&gt;),
+}
+</code></pre></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str,
+        results: &amp;Sender&lt;Message&gt;) -&gt; Result&lt;()&gt;
+{
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = try!(line);
+        if line.contains(pattern) {
+            results.send(<span class="highlighted">Message::Hit(line)</span>).unwrap();
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str,
+        results: &amp;Sender&lt;Message&gt;) -&gt; <span class="highlighted">Result&lt;()&gt;</span>
+{
+    let file = <span class="highlighted">try!</span>(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = <span class="highlighted">try!</span>(line);
+        if line.contains(pattern) {
+            results.send(Message::Hit(line)).unwrap();
+        }
+    }
+    return <span class="highlighted">Ok(())</span>;
+}
+</code></pre></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>let mut pool = scoped_threadpool::Pool::new(8);
+let files : Vec&lt;String&gt; = args.collect();
+let (results_tx, results_rx) = channel();
+</code></pre></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>let mut pool = <span class="highlighted">scoped_threadpool::Pool::new(8);</span>
+let files : Vec&lt;String&gt; = args.collect();
+let (results_tx, results_rx) = channel();
+</code></pre></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>let mut pool = scoped_threadpool::Pool::new(8);
+<span class="highlighted">let files : Vec&lt;String&gt; = args.collect();</span>
+let (results_tx, results_rx) = channel();
+</code></pre></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>// single-threaded version
+<span class="highlighted">for file in args</span> {
+    match grep(&amp;file, &amp;pattern) {
+        Err(e) =&gt; {
+            writeln!(std::io::stderr(),
+                     &quot;Error searching {}: {}&quot;, file, e)
+                .unwrap();
+        },
+        Ok(_) =&gt; ()
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>let mut pool = scoped_threadpool::Pool::new(8);
+<span class="highlighted">let files : Vec&lt;String&gt; = args.collect();</span>
+
+pool.scoped(|scope| { ... });
+</code></pre></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>let mut pool = scoped_threadpool::Pool::new(8);
+let files : Vec&lt;String&gt; = args.collect();
+
+<span class="highlighted">pool.scoped</span>(|scope| { ... });
+</code></pre></div></section><section class="slide"><div><h2>A multi-threaded grep</h2><pre><code>let mut pool = scoped_threadpool::Pool::new(8);
+let files : Vec&lt;String&gt; = args.collect();
+
+pool.scoped(<span class="highlighted">|scope| { ... }</span>);
+</code></pre></div></section><section class="slide"><div><h2>a multi-threaded grep</h2><pre><code>pool.scoped(|scope| {
+    let receiver;
+    {
+        let (sender, recv) = std::sync::mpsc::channel();
+        receiver = recv;
+
+        ... enqueue search tasks ...
+    }
+
+    for message in receiver {
+        ... process results ...
+    }
+})
+</code></pre></div></section><section class="slide"><div><h2>a multi-threaded grep</h2><pre><code>pool.scoped(|scope| {
+    let receiver;
+    {
+        let (sender, recv) = <span class="highlighted">std::sync::mpsc::channel()</span>;
+        receiver = recv;
+
+        ... enqueue search tasks ...
+    }
+
+    for message in receiver {
+        ... process results ...
+    }
+})
+</code></pre></div></section><section class="slide"><div><h2>a multi-threaded grep</h2><pre><code>pool.scoped(|scope| {
+    let receiver;
+    {
+        let <span class="highlighted">(sender, recv)</span> = std::sync::mpsc::channel();
+        receiver = recv;
+
+        ... enqueue search tasks ...
+    }
+
+    for message in receiver {
+        ... process results ...
+    }
+})
+</code></pre></div></section><section class="slide"><div><h2>a multi-threaded grep</h2><pre><code>pool.scoped(|scope| {
+    let receiver;
+    {
+        let (<span class="highlighted">sender</span>, recv) = std::sync::mpsc::channel();
+        receiver = recv;
+
+        ... enqueue search tasks ...
+    }
+
+    for message in receiver {
+        ... process results ...
+    }
+})
+</code></pre></div></section><section class="slide"><div><h2>a multi-threaded grep</h2><pre><code>pool.scoped(|scope| {
+    let <span class="highlighted">receiver</span>;
+    {
+        let (sender, recv) = std::sync::mpsc::channel();
+        <span class="highlighted">receiver</span> = recv;
+
+        ... enqueue search tasks ...
+    }
+
+    for message in <span class="highlighted">receiver</span> {
+        ... process results ...
+    }
+})
+</code></pre></div></section><section class="slide"><div><h2>enqueuing search tasks</h2><pre><code>for file in &amp;files {
+    let pattern_ref = &amp;pattern;
+    let sender_clone = sender.clone();
+    scope.execute(move || {
+        let result = grep(file, pattern_ref, &amp;sender_clone);
+        sender_clone.send(Message::Done(file, result))
+            .expect(&quot;receiver died&quot;);
+    });
+}
+</code></pre></div></section><section class="slide"><div><h2>enqueuing search tasks</h2><pre><code><span class="highlighted">for file in &amp;files</span> {
+    let pattern_ref = &amp;pattern;
+    let sender_clone = sender.clone();
+    scope.execute(move || {
+        let result = grep(file, pattern_ref, &amp;sender_clone);
+        sender_clone.send(Message::Done(file, result))
+            .expect(&quot;receiver died&quot;);
+    });
+}
+</code></pre></div></section><section class="slide"><div><h2>enqueuing search tasks</h2><pre><code>for file in &amp;files {
+    let pattern_ref = &amp;pattern;
+    let sender_clone = <span class="highlighted">sender.clone()</span>;
+    scope.execute(move || {
+        let result = grep(file, pattern_ref, &amp;sender_clone);
+        sender_clone.send(Message::Done(file, result))
+            .expect(&quot;receiver died&quot;);
+    });
+}
+</code></pre></div></section><section class="slide"><div><h2>enqueuing search tasks</h2><pre><code>for file in &amp;files {
+    let pattern_ref = &amp;pattern;
+    let sender_clone = sender.clone();
+    <span class="highlighted">scope.execute</span>(move || {
+        let result = grep(file, pattern_ref, &amp;sender_clone);
+        sender_clone.send(Message::Done(file, result))
+            .expect(&quot;receiver died&quot;);
+    });
+}
+</code></pre></div></section><section class="slide"><div><h2>enqueuing search tasks</h2><pre><code>for file in &amp;files {
+    let pattern_ref = &amp;pattern;
+    let sender_clone = sender.clone();
+    scope.execute(<span class="highlighted">move</span> || {
+        let result = grep(file, pattern_ref, &amp;sender_clone);
+        sender_clone.send(Message::Done(file, result))
+            .expect(&quot;receiver died&quot;);
+    });
+}
+</code></pre></div></section><section class="slide"><div><h2>enqueuing search tasks</h2><pre><code>for file in &amp;files {
+    let pattern_ref = &amp;pattern;
+    let sender_clone = sender.clone();
+    scope.execute(move <span class="highlighted">||</span> {
+        let result = grep(file, pattern_ref, &amp;sender_clone);
+        sender_clone.send(Message::Done(file, result))
+            .expect(&quot;receiver died&quot;);
+    });
+}
+</code></pre></div></section><section class="slide"><div><h2>enqueuing search tasks</h2><pre><code>for file in &amp;files {
+    let pattern_ref = &amp;pattern;
+    let sender_clone = sender.clone();
+    scope.execute(move || {
+        let result = <span class="highlighted">grep(file, pattern_ref, &amp;sender_clone)</span>;
+        sender_clone.send(Message::Done(file, result))
+            .expect(&quot;receiver died&quot;);
+    });
+}
+</code></pre></div></section><section class="slide"><div><h2>enqueuing search tasks</h2><pre><code>for file in &amp;files {
+    let pattern_ref = &amp;pattern;
+    let sender_clone = sender.clone();
+    scope.execute(move || {
+        let <span class="highlighted">result</span> = grep(file, pattern_ref, &amp;sender_clone);
+        sender_clone.send(Message::Done(file, result))
+            .expect(&quot;receiver died&quot;);
+    });
+}
+</code></pre></div></section><section class="slide"><div><h2>enqueuing search tasks</h2><pre><code>for file in &amp;files {
+    let pattern_ref = &amp;pattern;
+    let sender_clone = sender.clone();
+    scope.execute(move || {
+        let result = grep(file, pattern_ref, &amp;sender_clone);
+        sender_clone.send(<span class="highlighted">Message::Done(file, result)</span>)
+            .expect(&quot;receiver died&quot;);
+    });
+}
+</code></pre></div></section><section class="slide"><div><h2>processing search results</h2><pre><code>for message in receiver {
+    match message {
+        Message::Hit(line) =&gt; { println!(&quot;{}&quot;, line); }
+        Message::Done(file, result) =&gt; {
+            if let Err(e) = result {
+                writeln!(std::io::stderr(),
+                         &quot;Error searching {}: {}&quot;, file, e)
+                    .unwrap();
+            }
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>processing search results</h2><pre><code>for message in <span class="highlighted">receiver</span> {
+    match message {
+        Message::Hit(line) =&gt; { println!(&quot;{}&quot;, line); }
+        Message::Done(file, result) =&gt; {
+            if let Err(e) = result {
+                writeln!(std::io::stderr(),
+                         &quot;Error searching {}: {}&quot;, file, e)
+                    .unwrap();
+            }
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>processing search results</h2><pre><code>for message in receiver {
+    <span class="highlighted">match message</span> {
+        Message::Hit(line) =&gt; { println!(&quot;{}&quot;, line); }
+        Message::Done(file, result) =&gt; {
+            if let Err(e) = result {
+                writeln!(std::io::stderr(),
+                         &quot;Error searching {}: {}&quot;, file, e)
+                    .unwrap();
+            }
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>processing search results</h2><pre><code>for message in receiver {
+    match message {
+        <span class="highlighted">Message::Hit(line)</span> =&gt; { println!(&quot;{}&quot;, line); }
+        Message::Done(file, result) =&gt; {
+            if let Err(e) = result {
+                writeln!(std::io::stderr(),
+                         &quot;Error searching {}: {}&quot;, file, e)
+                    .unwrap();
+            }
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>processing search results</h2><pre><code>for message in receiver {
+    match message {
+        Message::Hit(line) =&gt; { println!(&quot;{}&quot;, line); }
+        <span class="highlighted">Message::Done(file, result)</span> =&gt; {
+            if let Err(e) = result {
+                writeln!(std::io::stderr(),
+                         &quot;Error searching {}: {}&quot;, file, e)
+                    .unwrap();
+            }
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>processing search results</h2><pre><code>for message in receiver {
+    match message {
+        Message::Hit(line) =&gt; { println!(&quot;{}&quot;, line); }
+        Message::Done(file, result) =&gt; {
+            <span class="highlighted">if let Err(e) = result</span> {
+                writeln!(std::io::stderr(),
+                         &quot;Error searching {}: {}&quot;, file, e)
+                    .unwrap();
+            }
+        }
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>It works!</h2></div></section><section class="slide"><div><h2>What does this show?</h2><ul><li>Worker pools can manage large tasks with a bounded number of threads.</li><li class="next">Channels are a convenient way to carry messages between threads.</li><li class="next">We can throw pointers around between threads without fear.</li><li class="next">Concurrent Rust programs are still non-deterministic, but the non-determinism occurs only at operations designed for it—not just anywhere.</li></ul></div></section><div class="progress"><div/></div><script src="shower/shower.min.js"></script></body></html>
