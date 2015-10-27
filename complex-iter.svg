@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.1//EN'
+  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'>
+<svg height="720px" version="1.1" viewBox="0 0 1280 720" width="1280px" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <rect fill="white" height="720" stroke="none" width="1280" x="0" y="0"/>
+  <g stroke="black">
+    <line stroke-width="3" x1="-50" x2="1330" y1="360" y2="360"/>
+    <line stroke-width="3" x1="-50" x2="-50" y1="354" y2="366"/>
+    <line stroke-width="3" x1="180" x2="180" y1="354" y2="366"/>
+    <line stroke-width="3" x1="410" x2="410" y1="354" y2="366"/>
+    <line stroke-width="3" x1="640" x2="640" y1="348" y2="372"/>
+    <line stroke-width="3" x1="870" x2="870" y1="354" y2="366"/>
+    <line stroke-width="3" x1="1100" x2="1100" y1="354" y2="366"/>
+    <line stroke-width="3" x1="1330" x2="1330" y1="354" y2="366"/>
+  </g>
+</svg>
+

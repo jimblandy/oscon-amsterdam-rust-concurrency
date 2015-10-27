@@ -1,0 +1,151 @@
+* Proposal
+** Title: Concurrency First in Rust
+** Description (brief overview for marketing purposes, max. length 400 characters—about 65 words)
+
+The Rust programming language makes writing multi-threaded code painless. Rust
+is a systems programming language, with performance comparable to that of C and
+C++. However, Rust prevents data races at compile time, eliminating many of the
+opportunities for bugs that make concurrent programming risky in other
+languages.
+
+** Abstract
+
+    (Longer, more detailed description (3-6 paragraph, bullet points welcome) of
+    your presentation to help the program committee understand what you will cover.
+    Please keep in mind that if your proposal is chosen, this abstract will also
+    appear on the website to help conference attendees decide if it's right for
+    them.)
+
+Multiprocessor machines are everywhere: even mid-range mobile devices now often
+have more than one processor core. But writing concurrent code in C and C++ is
+challenging even for experienced developers: data races are notoriously
+difficult to debug, and concurrency makes ordinary memory bugs harder to
+reproduce. So programmers usually turn to concurrency as a last resort, only
+after they've squeezed as much performance out of their single-threaded code as
+possible.
+
+But what if concurrency were practical as a method of "first resort"? What if we
+could design ordinary programs around the opportunities for parallelism they
+present, without introducing risk and making our code hard to maintain for all
+but the wizards?
+
+Rust is a new systems programming language from Mozilla, designed for memory
+safety and trustworthy concurrency. Rust catches data races and memory errors at
+compile time: you can't forget to lock the right mutex before accessing shared
+data, nor can you modify a data structure after handing it off to another
+thread, nor can you free data another thread was using, and so on. Rust does not
+use garbage collection, but instead relies on a simple set of rules for
+ownership, moving, and borrowing to prevent the kinds of memory errors that
+plague concurrent C and C++ code. Mozilla has used Rust to implement an
+experimental browser engine named Servo, which already outperforms Firefox's
+Gecko engine on real-world web sites.
+
+This talk will demonstrate various styles of concurrent code in Rust: message
+passing, shared data protected by mutexes, and lock-free algorithms using atomic
+memory operations. We'll show how Rust's ownership rules, unique among
+production programming languages, prevent data races. And we'll show how to take
+responsibility for correctness yourself when the compiler is too strict, using
+Rust's `unsafe` mode.
+
+* Prerequisite knowledge
+
+Attendees will benefit from familiarity with C and C++, and experience with
+multi-threaded programming.
+
+* Notes
+- slide aspect ratio 16:9, 1280x720
+* Points to include
+- the Rust process: "argue with compiler for 20min"
+
+* Outline
+
+- cover: bit of Mandelbrot poking in from corner
+
+- Message:
+
+  Rust makes concurrent designs much easier to explore, implement, and maintain,
+  by <b>statically guaranteeing</b> the absence of data races and memory corruption.
+
+- A Highly Abbreviated into to Rust
+  - Why Rust?
+    - safety, performance, concurrency
+    - programmer has control over performance
+    - Stroustroup statement of principles
+
+  - What kind of language?
+    - statically typed
+    - ahead-of-time compiler
+    - avoid hard-to-control features like JITs, GCs
+    - "traits" capture characteristics of types
+    - generic functions everywhere, type parameters bound by traits
+    - novel ownership system improves 
+
+
+  - But also safety
+  - Concurrency falls out from memory safety
+
+
+
+  - show off on-line docs
+  - Option and Result
+
+- Rust demo: Iron server
+
+
+- Concurrent grep
+  - show off channels, scoped worker pool
+
+- Mandelbrot
+  - What does z = z*z do?
+    - .8 0.64 0.41 0.17 (* .17 .17)
+      (* .64 .64) 0.4096
+      (* .41 .41) 0.1681
+      (* .17 .17) 0.0289
+      1.2
+      (* 1.2 1.2) 1.44
+      (* 1.44 1.44) 2.0736
+      (* 2.07 2.07) 4.2848999999999995
+
+- Banded Mandelbrot
+  - We do see a speedup!
+  - But you'd hope it'd be linear; it's not. Why?
+  - clue: adding threads beyond the number of cores (even hyper-threaded) continues to improve performance
+    - this effect goes *well* beyond the number of cores
+    - perf peaks at ~fifty threads
+    - just for fun: 1000 threads
+  - different bands of the image take different lengths of time to compute
+    - areas whose points take more iterations to escape take longer to render
+    - points in the set always take the maximum count, so bands with a lot of
+      intersection with the set take longer
+    - as written, when a thread finishes its band, it stops working on the computation
+    - having more threads means that the *cores* can keep working, even as threads finish early
+    - check the hypothesis: render an area that is entirely outside the set
+      - indeed, we see a linear speedup
+
+- Dynamically banded mandelbrot
+
+
+* References
+- [[https://bugzilla.mozilla.org/show_bug.cgi?id=1140773][Bug 1140773 - Intermittent js1_5/Array/regress-474529.js | (args: "--baseline-eager --no-fpu")]]
+  Bug in which a 'join' call in the GCParallelTask destructor was insufficient
+  to prevent race conditions in derived classes, because the base class
+  destructor runs after member destructors.
+- [[https://mail.mozilla.org/pipermail/rust-dev/2013-November/006314.html][rust-dev: Abandoning segmented stacks in Rust]]: Brian Anderson: post explaining
+  why Rust is dropping support for segmented stacks
+- [[https://docs.google.com/document/d/1wAaf1rYoM4S4gtnPh0zOlGzWtrZFQ5suE8qr2sD8uWQ/pub][Contiguous stacks]]: Go design document explaining "hot split" problem
+
+* Questions
+- What style of thread stack is Go using nowadays?
+  Go uses relocatable stacks. Brian Anderson suggested to me that goroutines
+  might be a bit oversold
+
+* Trashes
+* Trip notes
+- Passport number: 483950009 exp 2021-7-27
+- Eddy's phone number: +31 6 21 14 46 22
+- Park Plaza Vondelpark
+  Koninginneweg 34-36, 1075 CZ Amsterdam, Netherlands
+  +31 20 664 6111
+  parkplaza.com
+- RAI Amsterdam:
+  Europaplein 22, 1078 GZ Amsterdam, Netherlands

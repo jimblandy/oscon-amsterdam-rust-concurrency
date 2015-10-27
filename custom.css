@@ -1,0 +1,24 @@
+.slide.big p {
+    font-size: 45px;
+    font-weight: bold;
+}
+
+.slide pre code {
+    line-height: 1.4;
+}
+
+.slide pre code span.highlighted {
+    color: #C00;
+    background: #ddd;
+}
+
+.slide pre code:before {
+    content: ''
+}
+
+.slide h2 code {
+    background: inherit;
+    color: inherit;
+    line-height: inherit;
+    font-family: 'PT Mono', monospace;
+}

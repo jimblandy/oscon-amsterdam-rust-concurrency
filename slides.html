@@ -1,0 +1,374 @@
+<?xml version="1.0" ?><!DOCTYPE HTML><html lang="en"><head><title>Concurrency First in Rust</title><meta charset="utf-8"/><meta content="width=792, user-scalable=no" name="viewport"/><meta content="ie=edge" http-equiv="x-ua-compatible"/><link href="shower/themes/ribbon/styles/screen.css" rel="stylesheet"/><link href="custom.css" rel="stylesheet"/></head><body class="list"><header class="caption"><h1>Concurrency First in Rust</h1><p>Jim Blandy</p></header><section class="slide cover" id="Cover"><div><h2>Concurrency First in Rust</h2><p>Jim Blandy &lt;jimb@mozilla.com&gt; @jimblandy</p><img alt="" src="images/cover.png"/><style>
+                           #Cover h2 {
+                                   margin:30px 0 0;
+                                   color:#FFF;
+                                   text-align:center;
+                                   font-size:70px;
+                                   }
+                           #Cover p {
+                                   margin:10px 0 0;
+                                   text-align:center;
+                                   color:#FFF;
+                                   font-style:italic;
+                                   font-size:20px;
+                                   }
+                           #Cover p a {
+                                   color:#FFF;
+                                   }
+                           </style></div></section><section class="slide big"><div><p>Rust makes concurrent designs easier to explore, implement, and maintain, by
+guaranteeing the absence of data races and memory corruption.
+</p></div></section><section class="slide"><div><h2>Why Rust?</h2><ul><li>safety: no dangling pointers, no buffer overruns</li><li>performance: the programmer has control</li><li>concurrency: exploit multi-threaded machines</li></ul></div></section><section class="slide"><div><h2>How does Rust accomplish those goals?</h2><ul><li>statically typed language</li><li class="next">ahead-of-time compiler (no JIT)</li><li class="next">memory freed at well-defined points (no GC)</li><li class="next">“traits” capture common characteristics of types</li><li class="next">generic functions everywhere, compiled by specialization</li><li class="next">generic type parameters checked by traits</li></ul></div></section><section class="slide"><div><h2>Rust aims to compete with C++</h2><figure><blockquote><p>In general, C++ implementations obey the zero-overhead principle: What
+you don’t use, you don’t pay for. And further: What you do use, you
+couldn’t hand code any better.
+</p></blockquote><figcaption>Bjarne Stroustrup</figcaption></figure><p class="next">This is Rust's principle as well.
+</p></div></section><section class="slide"><div><h2>A simple Rust function</h2><pre><code>fn gcd(mut n: u64, mut m: u64) -&gt; u64 {
+    assert!(n != 0 &amp;&amp; m != 0);
+    while m != 0 {
+        if m &lt; n {
+            let t = m; m = n; n = t;
+        }
+        m = m % n;
+    }
+    n   
+}
+</code></pre></div></section><section class="slide"><div><h2>A simple Rust function</h2><pre><code>fn gcd(mut n: <span class="highlighted">u64</span>, mut m: <span class="highlighted">u64</span>) -&gt; <span class="highlighted">u64</span> {
+    assert!(n != 0 &amp;&amp; m != 0);
+    while m != 0 {
+        if m &lt; n {
+            let t = m; m = n; n = t;
+        }
+        m = m % n;
+    }
+    n   
+}
+</code></pre></div></section><section class="slide"><div><h2>A simple Rust function</h2><pre><code>fn gcd(mut n: u64, mut m: u64) -&gt; u64 {
+    assert!(n != 0 &amp;&amp; m != 0);
+    while m != 0 {
+        if m &lt; n {
+            <span class="highlighted">let t = m;</span> m = n; n = t;
+        }
+        m = m % n;
+    }
+    n   
+}
+</code></pre></div></section><section class="slide"><div><h2>A simple Rust function</h2><pre><code>fn gcd(mut n: u64, mut m: u64) -&gt; u64 {
+    assert!(n != <span class="highlighted">0</span> &amp;&amp; m != <span class="highlighted">0</span>);
+    while m != <span class="highlighted">0</span> {
+        if m &lt; n {
+            let t = m; m = n; n = t;
+        }
+        m = m % n;
+    }
+    n   
+}
+</code></pre></div></section><section class="slide"><div><h2>A simple Rust function</h2><pre><code>fn gcd(mut n: u64, mut m: u64) -&gt; u64 {
+    assert!(n != 0 &amp;&amp; m != 0);
+    while m != 0 {
+        if m &lt; n {
+            let t = m; m = n; n = t;
+        }
+        m = m % n;
+    }
+ <span class="highlighted">   n   </span>
+}
+</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic datatypes</h2><pre><code>enum Option&lt;T&gt; {
+    None,
+    Some(T),
+}
+</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic datatypes</h2><pre><code>enum Option<span class="highlighted">&lt;T&gt;</span> {
+    None,
+    Some(T),
+}
+</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic datatypes</h2><pre><code>enum Option&lt;T&gt; {
+    <span class="highlighted">None</span>,
+    Some(T),
+}
+</code></pre></div></section><section class="slide"><div><h2>Rust <code>enum</code> types, aka algebraic datatypes</h2><pre><code>enum Option&lt;T&gt; {
+    None,
+    <span class="highlighted">Some(T)</span>,
+}
+</code></pre></div></section><section class="slide"><div><h2>A safe division function</h2><pre><code>fn safe_div(n: i32, d: i32) -&gt; Option&lt;i32&gt; {
+    if d == 0 {
+        return None;
+    }
+    return Some(n / d);
+}
+</code></pre></div></section><section class="slide"><div><h2>A safe division function</h2><pre><code>fn safe_div(n: i32, d: i32) -&gt; <span class="highlighted">Option&lt;i32&gt;</span> {
+    if d == 0 {
+        return None;
+    }
+    return Some(n / d);
+}
+</code></pre></div></section><section class="slide"><div><h2>A safe division function</h2><pre><code>fn safe_div(n: i32, d: i32) -&gt; Option&lt;i32&gt; {
+    if d == 0 {
+        return <span class="highlighted">None</span>;
+    }
+    return Some(n / d);
+}
+</code></pre></div></section><section class="slide"><div><h2>A safe division function</h2><pre><code>fn safe_div(n: i32, d: i32) -&gt; Option&lt;i32&gt; {
+    if d == 0 {
+        return None;
+    }
+    return <span class="highlighted">Some(n / d)</span>;
+}
+</code></pre></div></section><section class="slide"><div><h2>A safe division function</h2><pre><code>fn safe_div(n: i32, d: i32) -&gt; Option&lt;i32&gt; {
+    if d == 0 {
+        return None;
+    }
+    return Some(n / d);
+}
+
+match safe_div(24, 3) {
+    None =&gt; println!(&quot;No quotient.&quot;),
+    Some(v) =&gt; println!(&quot;quotient is {}&quot;, v)
+}
+</code></pre></div></section><section class="slide"><div><h2>A safe division function</h2><pre><code>fn safe_div(n: i32, d: i32) -&gt; Option&lt;i32&gt; {
+    if d == 0 {
+        return None;
+    }
+    return Some(n / d);
+}
+
+<span class="highlighted">match</span> safe_div(24, 3) {
+    None =&gt; println!(&quot;No quotient.&quot;),
+    Some(v) =&gt; println!(&quot;quotient is {}&quot;, v)
+}
+</code></pre></div></section><section class="slide"><div><h2>A safe division function</h2><pre><code>fn safe_div(n: i32, d: i32) -&gt; Option&lt;i32&gt; {
+    if d == 0 {
+        return <span class="highlighted">None</span>;
+    }
+    return Some(n / d);
+}
+
+match safe_div(24, 3) {
+    <span class="highlighted">None</span> =&gt; println!(&quot;No quotient.&quot;),
+    Some(v) =&gt; println!(&quot;quotient is {}&quot;, v)
+}
+</code></pre></div></section><section class="slide"><div><h2>A safe division function</h2><pre><code>fn safe_div(n: i32, d: i32) -&gt; Option&lt;i32&gt; {
+    if d == 0 {
+        return None;
+    }
+    return Some(n / d);
+}
+
+match safe_div(24, 3) {
+    None =&gt; <span class="highlighted">println!(&quot;No quotient.&quot;)</span>,
+    Some(v) =&gt; println!(&quot;quotient is {}&quot;, v)
+}
+</code></pre></div></section><section class="slide"><div><h2>A safe division function</h2><pre><code>fn safe_div(n: i32, d: i32) -&gt; Option&lt;i32&gt; {
+    if d == 0 {
+        return None;
+    }
+    return <span class="highlighted">Some(n / d)</span>;
+}
+
+match safe_div(24, 3) {
+    None =&gt; println!(&quot;No quotient.&quot;),
+    <span class="highlighted">Some(v)</span> =&gt; println!(&quot;quotient is {}&quot;, v)
+}
+</code></pre></div></section><section class="slide"><div><h2>A safe division function</h2><pre><code>fn safe_div(n: i32, d: i32) -&gt; Option&lt;i32&gt; {
+    if d == 0 {
+        return None;
+    }
+    return Some(n / d);
+}
+
+match safe_div(24, 3) {
+    None =&gt; println!(&quot;No quotient.&quot;),
+    Some(v) =&gt; <span class="highlighted">println!(&quot;quotient is {}&quot;, v)</span>
+}
+</code></pre></div></section><section class="slide"><div><h2>Results from fallible operations</h2><pre><code>#[must_use]
+enum Result&lt;T, E&gt; {
+    Ok(T),
+    Err(E),
+}
+</code></pre></div></section><section class="slide"><div><h2>Results from fallible operations</h2><pre><code>#[must_use]
+enum Result<span class="highlighted">&lt;T, E&gt;</span> {
+    Ok(T),
+    Err(E),
+}
+</code></pre></div></section><section class="slide"><div><h2>Results from fallible operations</h2><pre><code>#[must_use]
+enum Result&lt;T, E&gt; {
+    <span class="highlighted">Ok(T)</span>,
+    Err(E),
+}
+</code></pre></div></section><section class="slide"><div><h2>Results from fallible operations</h2><pre><code>#[must_use]
+enum Result&lt;T, E&gt; {
+    Ok(T),
+    <span class="highlighted">Err(E)</span>,
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = try!(line);
+        if line.contains(pattern) {
+            println!(&quot;{}&quot;, line);
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; <span class="highlighted">Result&lt;()&gt;</span> {
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = try!(line);
+        if line.contains(pattern) {
+            println!(&quot;{}&quot;, line);
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;<span class="highlighted">()</span>&gt; {
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = try!(line);
+        if line.contains(pattern) {
+            println!(&quot;{}&quot;, line);
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+    let file = <span class="highlighted">try!</span>(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = try!(line);
+        if line.contains(pattern) {
+            println!(&quot;{}&quot;, line);
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+    let file = try!(File::open(path));
+    let buffered = <span class="highlighted">BufReader::new(file);</span>
+    for line in buffered.lines() {
+        let line = try!(line);
+        if line.contains(pattern) {
+            println!(&quot;{}&quot;, line);
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    <span class="highlighted">for line in buffered.lines()</span> {
+        let line = try!(line);
+        if line.contains(pattern) {
+            println!(&quot;{}&quot;, line);
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = <span class="highlighted">try!</span>(line);
+        if line.contains(pattern) {
+            println!(&quot;{}&quot;, line);
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = try!(line);
+        if <span class="highlighted">line.contains(pattern)</span> {
+            println!(&quot;{}&quot;, line);
+        }
+    }
+    return Ok(());
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = try!(line);
+        if line.contains(pattern) {
+            println!(&quot;{}&quot;, line);
+        }
+    }
+    <span class="highlighted">return Ok(());</span>
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>fn grep(path: &amp;str, pattern: &amp;str) -&gt; Result&lt;()&gt; {
+    let file = try!(File::open(path));
+    let buffered = BufReader::new(file);
+    for line in buffered.lines() {
+        let line = try!(line);
+        if line.contains(pattern) {
+            println!(&quot;{}&quot;, line);
+        }
+    }
+    <span class="highlighted">Ok(())</span>
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>for file in args {
+    match grep(&amp;file, &amp;pattern) {
+        Err(e) =&gt; {
+            writeln!(std::io::stderr(),
+                     &quot;Error searching {}: {}&quot;, file, e)
+                .unwrap();
+        },
+        Ok(_) =&gt; ()
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code><span class="highlighted">for file in args</span> {
+    match grep(&amp;file, &amp;pattern) {
+        Err(e) =&gt; {
+            writeln!(std::io::stderr(),
+                     &quot;Error searching {}: {}&quot;, file, e)
+                .unwrap();
+        },
+        Ok(_) =&gt; ()
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>for file in args {
+    match <span class="highlighted">grep(&amp;file, &amp;pattern)</span> {
+        Err(e) =&gt; {
+            writeln!(std::io::stderr(),
+                     &quot;Error searching {}: {}&quot;, file, e)
+                .unwrap();
+        },
+        Ok(_) =&gt; ()
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>for file in args {
+    match grep(&amp;file, &amp;pattern) {
+        <span class="highlighted">Err(e)</span> =&gt; {
+            writeln!(std::io::stderr(),
+                     &quot;Error searching {}: {}&quot;, file, e)
+                .unwrap();
+        },
+        Ok(_) =&gt; ()
+    }
+}
+</code></pre></div></section><section class="slide"><div><h2>A single-threaded grep</h2><pre><code>for file in args {
+    match grep(&amp;file, &amp;pattern) {
+        Err(e) =&gt; {
+            writeln!(std::io::stderr(),
+                     &quot;Error searching {}: {}&quot;, file, e)
+                .unwrap();
+        },
+        <span class="highlighted">Ok(_) =&gt; ()</span>
+    }
+}
+</code></pre></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-home-page.png"/></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-search-results.png"/></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-scoped_threadpool.png"/></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-scoped_threadpool-dependency.png"/></div></section><section class="slide"><div><h2>The <code>Cargo.toml</code> file</h2><pre><code>[package]
+name = &quot;pgrep&quot;
+version = &quot;0.1.0&quot;
+authors = [&quot;Jim Blandy &lt;jimb@red-bean.com&gt;&quot;]
+
+[dependencies]
+scoped_threadpool = &quot;0.1.6&quot;
+</code></pre></div></section><section class="slide"><div><h2>The <code>Cargo.toml</code> file</h2><pre><code>[package]
+name = &quot;pgrep&quot;
+version = &quot;0.1.0&quot;
+authors = [&quot;Jim Blandy &lt;jimb@red-bean.com&gt;&quot;]
+
+[dependencies]
+<span class="highlighted">scoped_threadpool = &quot;0.1.6&quot;</span>
+</code></pre></div></section><section class="slide cover bigpicture"><div><img alt="" src="images/cargo-build-pgrep.png"/></div></section><div class="progress"><div/></div><script src="shower/shower.min.js"></script></body></html>
