@@ -315,6 +315,10 @@ add(CodeCallout('processing search results', """
 
 add(Slide('It works!'))
 
+add(Slide("Looks the same as C++.",
+          Para("Yes; Rust isn't a new paradigm for concurrency.").reveal(),
+          Para("... but this program ran correctly the first time it compiled.").reveal()))
+
 add(Slide('What does this show?',
           Points("Worker pools can manage large tasks with a bounded number of threads.",
                  "Channels are a convenient way to carry messages between threads.",
@@ -347,6 +351,7 @@ add(Slide('a Complex variation',
               """),
           Para(u"... it's complicated.").reveal()))
 
+# Generated with:
 # ./target/release/mandelbrot ~/rust/amsterdam/images/mandelbrot.png 1024x768 -2.75,1.20 1.25,-1.80
 add(BigPicture('images/mandelbrot.png'))
 
@@ -554,6 +559,9 @@ add(Slide('Summing up',
                  'Never a data race, if you stick to safe code.',
                  "Rust's concurrency primitives are open-ended: when you know what you're doing, you can build new safe primitives from unsafe implementations."
                  "Benchmark, and you learn cool stuff.").reveal()))
+
+for i in xrange(5):
+    add(BigPicture('images/subsets-{}.svg'.format(i)))
 
 
 
