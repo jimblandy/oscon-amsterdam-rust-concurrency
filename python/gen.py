@@ -334,7 +334,7 @@ for i in xrange(0, 9):
 add(Slide('a variation',
           Code("""
               fn m(c: f64) {
-                  z = 0;
+                  let z = 0;
                   loop {
                       z = z*z + c;
                   }
@@ -345,7 +345,7 @@ add(Slide('a variation',
 add(Slide('a Complex variation',
           Code("""
               fn m(c: Complex<f64>) {
-                  z = Complex { re: 0., im: 0. };
+                  let z = Complex { re: 0., im: 0. };
                   loop {
                       z = z*z + c;
                   }
@@ -559,7 +559,7 @@ add(Slide('Summing up',
                  'Mutexes work.',
                  'Atomics work.',
                  'Never a data race, if you stick to safe code.',
-                 "Rust's concurrency primitives are open-ended: when you know what you're doing, you can build new safe primitives from unsafe implementations."
+                 "Rust's concurrency primitives are open-ended: when you know what you're doing, you can build new safe primitives from unsafe implementations.",
                  "Benchmark, and you learn cool stuff.").reveal()))
 
 for i in xrange(5):
