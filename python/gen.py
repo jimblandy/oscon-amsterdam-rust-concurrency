@@ -571,5 +571,5 @@ with codecs.open('slides.html', 'w', 'utf-8') as f:
     pr.render(f)
 
 # Local Variables:
-# compile-command: "cd ~/rust/amsterdam && python python/gen.py"
+# compile-command: "python python/gen.py"
 # End:
